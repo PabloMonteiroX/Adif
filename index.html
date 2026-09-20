@@ -806,77 +806,6 @@ nav.tabs button,.chip,.btn,.score-line,.mini-btn,footer .f-line{
   box-shadow:8px 0 0 var(--brass-soft);
   opacity:.9;
 }
-.retro-rail{
-  height:30px;
-  position:relative;
-  max-width:440px;
-  margin:.35rem auto -.15rem;
-  overflow:hidden;
-}
-.pixel-train{
-  position:absolute;
-  left:-62px;
-  bottom:9px;
-  width:52px;
-  height:14px;
-  background:#d8bd72;
-  border:2px solid #0b2019;
-  box-shadow:
-    6px -5px 0 -2px #d8bd72,
-    18px -5px 0 -2px #d8bd72,
-    30px -5px 0 -2px #d8bd72;
-  image-rendering:pixelated;
-  animation:trainRun 9s linear infinite;
-}
-.pixel-train::before{
-  content:"";
-  position:absolute;
-  left:-8px;
-  top:4px;
-  width:8px;
-  height:7px;
-  background:#d8bd72;
-  border-left:2px solid #0b2019;
-}
-.pixel-train::after{
-  content:"";
-  position:absolute;
-  right:-5px;
-  bottom:-5px;
-  width:6px;
-  height:4px;
-  background:#0b2019;
-  box-shadow:-38px 0 0 #0b2019;
-}
-.pt-window{
-  position:absolute;
-  top:2px;
-  width:8px;
-  height:5px;
-  background:#254d43;
-  border:1px solid #0b2019;
-}
-.pt-window.w1{left:5px}.pt-window.w2{left:17px}
-.pt-light{
-  position:absolute;
-  right:-2px;
-  top:4px;
-  width:2px;
-  height:4px;
-  background:#fff3bf;
-}
-.pt-wheel{display:none}
-.rail-line{
-  position:absolute;
-  left:0;right:0;bottom:4px;
-  height:2px;
-  background:rgba(255,253,246,.38);
-  box-shadow:0 5px 0 rgba(255,253,246,.16);
-}
-@keyframes trainRun{
-  from{transform:translateX(0)}
-  to{transform:translateX(calc(100vw + 120px))}
-}
 .retro-footer-train{
   position:relative;
   height:20px;
@@ -925,7 +854,7 @@ nav.tabs button,.chip,.btn,.score-line,.mini-btn,footer .f-line{
 }
 
 @media (prefers-reduced-motion: reduce){
-  .pixel-train,.footer-train{animation:none}
+  .footer-train{animation:none}
 }
 
 @media (max-width:560px){
@@ -939,9 +868,6 @@ nav.tabs button,.chip,.btn,.score-line,.mini-btn,footer .f-line{
     white-space:normal;
     line-height:1.15;
   }
-  .retro-rail{height:22px;margin:.1rem auto -.05rem}
-  .pixel-train{bottom:6px}
-  .rail-line{bottom:2px}
   .retro-footer-train{height:15px}
 }
 
@@ -979,13 +905,6 @@ nav.tabs button,.chip,.btn,.score-line,.mini-btn,footer .f-line{
 <div class="brand-row">
   <div class="adif-logo" aria-label="ADIF">adif</div>
   <div class="station-over">Administrador de Infraestructuras Ferroviarias</div>
-</div>
-<div class="retro-rail" aria-hidden="true">
-  <div class="pixel-train">
-    <span class="pt-window w1"></span><span class="pt-window w2"></span>
-    <span class="pt-light"></span><span class="pt-wheel a"></span><span class="pt-wheel b"></span>
-  </div>
-  <div class="rail-line"></div>
 </div>
 
     <h1>Simulador de <em>Exámenes</em></h1>
