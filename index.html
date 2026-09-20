@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ADIF · OEP 2026 — Simulador Montador Eléctrico</title>
+<meta name="description" content="Simulador de exámenes ADIF OEP 2026 — Perfil 26/11PO Montador Eléctrico IISS. 108 preguntas oficiales de convocatorias 2023 y 2024.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════ FICHA TÉCNICA · PALETA FERROVIARIA ═══════════════ */
+:root{
+  --paper:#ece2c8;
+  --paper-2:#f6efdc;
+  --paper-3:#e2d5b4;
+  --ink:#2b2417;
+  --ink-soft:#6a5d44;
+  --ink-faint:#93866a;
+  --green:#1d3b2e;
+  --green-deep:#12281e;
+  --green-soft:#2c5140;
+  --brass:#a07c2c;
+  --brass-soft:#c2a055;
+  --red:#8a2f26;
+  --red-soft:#f3e2dd;
+  --ok:#2e5d3f;
+  --ok-bg:#e4ecdc;
+  --bad:#8a2f26;
+  --bad-bg:#f3e2dd;
+  --line:#c3ae83;
+  --shadow:rgba(43,36,23,.25);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Spectral',Georgia,serif;
+  color:var(--ink);
+  background-color:var(--paper);
+  background-image:
+    repeating-linear-gradient(0deg, transparent 0 34px, rgba(43,36,23,.022) 34px 35px),
+    radial-gradient(ellipse at 20% -10%, rgba(255,252,240,.7), transparent 55%),
+    radial-gradient(ellipse at 90% 110%, rgba(160,124,44,.10), transparent 50%);
+  min-height:100vh;
+  line-height:1.55;
+}
+::selection{background:var(--brass-soft);color:var(--green-deep)}
+
+/* ═══════════════ CABECERA · ESTACIÓN ═══════════════ */
+.masthead{
+  background:linear-gradient(180deg, var(--green) 0%, var(--green-deep) 100%);
+  color:var(--paper-2);
+  padding:2.4rem 1.2rem 0;
+  border-bottom:4px double var(--brass);
+  position:relative;
+}
+.masthead::after{
+  content:"";position:absolute;left:0;right:0;bottom:-13px;height:12px;
+  background:
+    repeating-linear-gradient(90deg, var(--ink) 0 14px, transparent 14px 30px),
+    linear-gradient(180deg, transparent 45%, rgba(43,36,23,.55) 45% 60%, transparent 60%);
+  background-size:30px 12px, 100% 100%;
+  background-repeat:repeat-x, no-repeat;
+  opacity:.9;
+}
+.mast-inner{max-width:880px;margin:0 auto;text-align:center}
+.station-over{
+  font-family:'IBM Plex Mono',monospace;font-size:.68rem;letter-spacing:.42em;
+  text-transform:uppercase;color:var(--brass-soft);margin-bottom:.9rem;
+}
+.station-over::before,.station-over::after{content:"— ";color:var(--brass)}
+.station-over::after{content:" —"}
+.masthead h1{
+  font-family:'Cormorant Garamond',serif;font-weight:700;
+  font-size:clamp(2rem,5.4vw,3.4rem);line-height:1.05;letter-spacing:.01em;
+}
+.masthead h1 em{font-style:italic;font-weight:500;color:var(--brass-soft)}
+.mast-sub{
+  margin:1rem auto 0;font-family:'IBM Plex Mono',monospace;font-size:.72rem;
+  letter-spacing:.24em;text-transform:uppercase;color:rgba(246,239,220,.75);
+}
+.mast-badge{
+  display:inline-block;margin-top:1.1rem;padding:.42rem 1.1rem;
+  border:1px solid var(--brass);color:var(--brass-soft);
+  font-family:'IBM Plex Mono',monospace;font-size:.66rem;letter-spacing:.3em;text-transform:uppercase;
+  border-radius:2px;
+}
+
+/* Tablero de salidas: contador global */
+.departures{
+  max-width:880px;margin:1.6rem auto 0;display:flex;justify-content:center;gap:1rem;flex-wrap:wrap;
+}
+.flap{
+  background:#0d1f17;border:1px solid var(--brass);border-radius:3px;
+  padding:.5rem 1.2rem;text-align:center;min-width:120px;
+  box-shadow:inset 0 2px 8px rgba(0,0,0,.5);
+}
+.flap .n{font-family:'IBM Plex Mono',monospace;font-size:1.5rem;font-weight:600;color:var(--paper-2);letter-spacing:.08em}
+.flap .l{font-family:'IBM Plex Mono',monospace;font-size:.56rem;letter-spacing:.28em;text-transform:uppercase;color:var(--brass-soft);margin-top:.15rem}
+
+/* ═══════════════ NAVEGACIÓN · TABLONES ═══════════════ */
+nav.tabs{
+  max-width:880px;margin:1.4rem auto 0;display:flex;justify-content:center;gap:.5rem;flex-wrap:wrap;
+  position:relative;z-index:2;padding-bottom:2rem;
+}
+nav.tabs button{
+  font-family:'IBM Plex Mono',monospace;font-size:.72rem;letter-spacing:.22em;text-transform:uppercase;
+  background:transparent;color:rgba(246,239,220,.65);
+  border:1px solid rgba(194,160,85,.45);padding:.6rem 1.3rem;cursor:pointer;
+  border-radius:2px;transition:all .22s ease;
+}
+nav.tabs button:hover{border-color:var(--brass-soft);color:var(--paper-2)}
+nav.tabs button.active{
+  background:var(--brass);border-color:var(--brass);color:var(--green-deep);
+  font-weight:600;box-shadow:0 2px 0 rgba(0,0,0,.35);
+}
+
+/* ═══════════════ CONTENEDOR ═══════════════ */
+main{max-width:880px;margin:0 auto;padding:2.4rem 1.2rem 4rem}
+section.view{display:none}
+section.view.active{display:block;animation:fadeUp .35s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+/* ═══════════════ FICHAS DE FILTRO ═══════════════ */
+.filter-bar{display:flex;flex-wrap:wrap;gap:.45rem;justify-content:center;margin-bottom:1.8rem}
+.chip{
+  font-family:'IBM Plex Mono',monospace;font-size:.64rem;letter-spacing:.14em;text-transform:uppercase;
+  background:var(--paper-2);color:var(--ink-soft);border:1px solid var(--line);
+  padding:.42rem .85rem;cursor:pointer;border-radius:2px;transition:all .18s ease;
+}
+.chip:hover{border-color:var(--brass);color:var(--ink)}
+.chip.active{background:var(--green);border-color:var(--green);color:var(--paper-2)}
+.chip .cnt{color:var(--brass);margin-left:.35em}
+.chip.active .cnt{color:var(--brass-soft)}
+
+/* ═══════════════ TARJETA DE PREGUNTA ═══════════════ */
+.qcard{
+  background:var(--paper-2);
+  border:1px solid var(--line);
+  outline:1px solid var(--line);outline-offset:5px;
+  padding:1.8rem 1.8rem 1.5rem;position:relative;
+  box-shadow:0 10px 30px -12px var(--shadow);
+  border-radius:2px;
+}
+.qcard::before,.qcard::after{
+  content:"";position:absolute;left:1.8rem;right:1.8rem;height:1px;background:var(--line);opacity:.6;
+}
+.qcard::before{top:.7rem}.qcard::after{bottom:.7rem}
+.qmeta{
+  display:flex;justify-content:space-between;align-items:center;gap:.8rem;flex-wrap:wrap;
+  margin-bottom:1.1rem;
+}
+.qtag{
+  font-family:'IBM Plex Mono',monospace;font-size:.62rem;letter-spacing:.24em;text-transform:uppercase;
+  color:var(--paper-2);background:var(--green-soft);padding:.28rem .8rem;border-radius:2px;
+}
+.qtag.t-esp{background:var(--brass);color:var(--green-deep)}
+.qtag.t-ing{background:#3a4a5c}
+.qnum{
+  font-family:'IBM Plex Mono',monospace;font-size:.68rem;color:var(--ink-faint);letter-spacing:.18em;
+}
+.qtext{
+  font-family:'Cormorant Garamond',serif;font-size:1.28rem;font-weight:600;line-height:1.45;
+  margin-bottom:1.4rem;color:var(--ink);
+}
+.opts{display:flex;flex-direction:column;gap:.55rem}
+.opt{
+  display:flex;align-items:flex-start;gap:.85rem;text-align:left;width:100%;
+  background:transparent;border:1px solid var(--line);border-radius:2px;
+  padding:.72rem .95rem;cursor:pointer;font-family:'Spectral',serif;font-size:.98rem;color:var(--ink);
+  transition:background .15s ease,border-color .15s ease;position:relative;
+}
+.opt .key{
+  flex:0 0 auto;font-family:'IBM Plex Mono',monospace;font-size:.72rem;font-weight:600;
+  border:1px solid var(--line);color:var(--ink-soft);width:1.55rem;height:1.55rem;
+  display:flex;align-items:center;justify-content:center;border-radius:50%;
+  transition:all .15s ease;margin-top:.08rem;
+}
+.opt:hover:not(:disabled){background:rgba(160,124,44,.08);border-color:var(--brass)}
+.opt:disabled{cursor:default;opacity:.88}
+.opt.correct{background:var(--ok-bg);border-color:var(--ok);opacity:1}
+.opt.correct .key{background:var(--ok);border-color:var(--ok);color:var(--paper-2)}
+.opt.wrong{background:var(--bad-bg);border-color:var(--bad);opacity:1}
+.opt.wrong .key{background:var(--bad);border-color:var(--bad);color:var(--paper-2)}
+.opt .mark{margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:.7rem;letter-spacing:.1em;align-self:center}
+
+/* Veredicto */
+.verdict{
+  margin-top:1.3rem;padding:.95rem 1.15rem;border-radius:2px;display:none;
+  border:1px dashed var(--line);background:var(--paper);
+}
+.verdict.show{display:block;animation:fadeUp .3s ease}
+.verdict.good{border-color:var(--ok);background:var(--ok-bg)}
+.verdict.bad{border-color:var(--bad);background:var(--bad-bg)}
+.verdict .vt{font-family:'Cormorant Garamond',serif;font-weight:700;font-size:1.15rem}
+.verdict.good .vt{color:var(--ok)}
+.verdict.bad .vt{color:var(--bad)}
+.verdict .vs{font-size:.9rem;color:var(--ink-soft);margin-top:.2rem}
+.verdict .vs b{color:var(--ink)}
+
+/* Controles de examen */
+.exam-controls{
+  display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;
+  margin-top:1.6rem;
+}
+.btn{
+  font-family:'IBM Plex Mono',monospace;font-size:.7rem;letter-spacing:.22em;text-transform:uppercase;
+  background:var(--green);color:var(--paper-2);border:none;padding:.78rem 1.6rem;cursor:pointer;
+  border-radius:2px;transition:all .2s ease;border:1px solid var(--green);
+}
+.btn:hover{background:var(--green-deep)}
+.btn.ghost{background:transparent;color:var(--ink-soft);border-color:var(--line)}
+.btn.ghost:hover{border-color:var(--brass);color:var(--ink)}
+.btn:disabled{opacity:.4;cursor:default}
+.score-line{
+  font-family:'IBM Plex Mono',monospace;font-size:.72rem;letter-spacing:.16em;color:var(--ink-soft);
+}
+.score-line b{color:var(--green)}
+.score-line .sep{color:var(--line);margin:0 .5em}
+
+/* ═══════════════ MODO ESTUDIO ═══════════════ */
+.study-list{display:flex;flex-direction:column;gap:1.1rem}
+.study-card{
+  background:var(--paper-2);border:1px solid var(--line);border-radius:2px;
+  padding:1.15rem 1.3rem;box-shadow:0 4px 14px -8px var(--shadow);
+}
+.study-card .qmeta{margin-bottom:.6rem}
+.study-card .qtext{font-size:1.1rem;margin-bottom:.9rem}
+.study-card .opts{gap:.4rem}
+.study-card .opt{padding:.5rem .8rem;font-size:.92rem;pointer-events:none}
+.study-card .opt.reveal-correct{background:var(--ok-bg);border-color:var(--ok)}
+.study-card .opt.reveal-correct .key{background:var(--ok);border-color:var(--ok);color:var(--paper-2)}
+.study-actions{display:flex;gap:.5rem;margin-top:.9rem;flex-wrap:wrap}
+.mini-btn{
+  font-family:'IBM Plex Mono',monospace;font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;
+  background:transparent;border:1px solid var(--line);color:var(--ink-soft);
+  padding:.42rem .9rem;cursor:pointer;border-radius:2px;transition:all .18s ease;
+}
+.mini-btn:hover{border-color:var(--brass);color:var(--ink)}
+.mini-btn.mastered{background:var(--ok);border-color:var(--ok);color:var(--paper-2)}
+.study-card.mastered-card{border-color:var(--ok);outline:1px solid var(--ok);outline-offset:3px}
+kbd.hint{
+  font-family:'IBM Plex Mono',monospace;font-size:.62rem;background:var(--paper-3);
+  border:1px solid var(--line);border-radius:3px;padding:.1rem .4rem;color:var(--ink-soft);
+}
+
+/* ═══════════════ ESTADÍSTICAS ═══════════════ */
+.stats-board{display:flex;flex-direction:column;gap:1rem}
+.stat-row{
+  background:var(--paper-2);border:1px solid var(--line);border-radius:2px;
+  padding:1.1rem 1.3rem;
+}
+.stat-head{display:flex;justify-content:space-between;align-items:baseline;gap:1rem;flex-wrap:wrap;margin-bottom:.6rem}
+.stat-name{font-family:'Cormorant Garamond',serif;font-weight:700;font-size:1.15rem}
+.stat-name .yr{font-family:'IBM Plex Mono',monospace;font-size:.62rem;letter-spacing:.2em;color:var(--brass);margin-left:.6em;vertical-align:middle}
+.stat-nums{font-family:'IBM Plex Mono',monospace;font-size:.68rem;color:var(--ink-soft);letter-spacing:.08em}
+.bar{height:10px;background:var(--paper-3);border:1px solid var(--line);border-radius:2px;overflow:hidden;position:relative}
+.bar .fill{height:100%;background:linear-gradient(90deg,var(--green-soft),var(--ok));width:0;transition:width .6s ease}
+.bar .fill.gold{background:linear-gradient(90deg,var(--brass),var(--brass-soft))}
+.legend{display:flex;gap:1.4rem;flex-wrap:wrap;justify-content:center;margin-bottom:1.6rem}
+.legend div{font-family:'IBM Plex Mono',monospace;font-size:.64rem;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-soft);display:flex;align-items:center;gap:.45rem}
+.sw{width:.85rem;height:.85rem;border-radius:2px;border:1px solid var(--line)}
+.sw.g{background:linear-gradient(90deg,var(--green-soft),var(--ok))}
+.sw.o{background:var(--paper-3)}
+.sw.b{background:linear-gradient(90deg,var(--brass),var(--brass-soft))}
+
+/* ═══════════════ PIE ═══════════════ */
+footer{
+  border-top:4px double var(--brass);margin-top:2rem;
+  padding:2rem 1.2rem 2.6rem;text-align:center;
+}
+footer .f-line{font-family:'IBM Plex Mono',monospace;font-size:.62rem;letter-spacing:.3em;text-transform:uppercase;color:var(--ink-faint)}
+footer .f-title{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.05rem;color:var(--ink-soft);margin-top:.5rem}
+
+/* ═══════════════ RESPONSIVE ═══════════════ */
+@media (max-width:560px){
+  .qcard{padding:1.3rem 1.1rem 1.2rem}
+  .qcard::before,.qcard::after{left:1.1rem;right:1.1rem}
+  .exam-controls{justify-content:center}
+  .flap{min-width:100px;padding:.4rem .8rem}
+  .flap .n{font-size:1.2rem}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════ CABECERA ═══════════ -->
+<header class="masthead">
+  <div class="mast-inner">
+    <div class="station-over">Administrador de Infraestructuras Ferroviarias</div>
+    <h1>Simulador de <em>Exámenes</em></h1>
+    <div class="mast-sub">OEP 2026 · Perfil 26/11PO · Montador Eléctrico IISS / Celador Línea Electrificada / Oficial de Subestaciones</div>
+    <div class="mast-badge">◈ 108 Preguntas Oficiales · Convocatorias 2023–2024 ◈</div>
+    <div class="departures">
+      <div class="flap"><div class="n" id="flap-mastered">0</div><div class="l">Dominadas</div></div>
+      <div class="flap"><div class="n" id="flap-attempts">0</div><div class="l">Contestadas</div></div>
+      <div class="flap"><div class="n" id="flap-accuracy">—</div><div class="l">Acierto %</div></div>
+    </div>
+  </div>
+  <nav class="tabs">
+    <button data-mode="exam" class="active">◉ Modo Examen</button>
+    <button data-mode="study">✎ Modo Estudio</button>
+    <button data-mode="stats">▤ Progreso</button>
+  </nav>
+</header>
+
+<main>
+  <!-- ═══════════ MODO EXAMEN ═══════════ -->
+  <section id="view-exam" class="view active">
+    <div class="filter-bar" id="exam-filters"></div>
+    <div id="exam-stage"></div>
+    <div class="exam-controls">
+      <span class="score-line" id="exam-score">Aciertos: <b>0</b> de 0</span>
+      <div style="display:flex;gap:.6rem;flex-wrap:wrap">
+        <button class="btn ghost" id="btn-reset-score">Reiniciar sesión</button>
+        <button class="btn" id="btn-next" disabled>Siguiente pregunta →</button>
+      </div>
+    </div>
+    <p style="text-align:center;margin-top:1.6rem;font-size:.85rem;color:var(--ink-faint)">
+      Pulsa <kbd class="hint">1</kbd>–<kbd class="hint">4</kbd> o <kbd class="hint">A</kbd>–<kbd class="hint">D</kbd> para responder · <kbd class="hint">Enter</kbd> para continuar
+    </p>
+  </section>
+
+  <!-- ═══════════ MODO ESTUDIO ═══════════ -->
+  <section id="view-study" class="view">
+    <div class="filter-bar" id="study-filters"></div>
+    <div class="study-list" id="study-list"></div>
+  </section>
+
+  <!-- ═══════════ PROGRESO ═══════════ -->
+  <section id="view-stats" class="view">
+    <div class="legend">
+      <div><span class="sw g"></span>Dominadas</div>
+      <div><span class="sw b"></span>Precisión de acierto</div>
+      <div><span class="sw o"></span>Pendiente</div>
+    </div>
+    <div class="stats-board" id="stats-board"></div>
+    <div style="text-align:center;margin-top:2rem">
+      <button class="btn ghost" id="btn-wipe">✕ Borrar todo el progreso</button>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="f-line">— Vía libre · Señal de salida concedida —</div>
+  <div class="f-title">«El tren no espera, pero la plaza sí se gana con oficio.»</div>
+  <div class="f-line" style="margin-top:.8rem">Fuentes: exámenes oficiales ADIF 2023 · 2024 &nbsp;·&nbsp; MMXXVI</div>
+</footer>
+
+<script>
+/* ═══════════════ DATOS · 108 PREGUNTAS ═══════════════ */
+const QUESTIONS = [{"id": "ing23-19", "cat": "ing23", "num": 19, "q": "He learned to ______ a bicycle when he was only three years old.", "opts": ["drive", "pilot", "ride", "stir"], "a": 2}, {"id": "ing23-20", "cat": "ing23", "num": 20, "q": "Your uncle's sons are your ______", "opts": ["nephews", "brothers-in-law", "grandsons", "cousins"], "a": 3}, {"id": "ing23-21", "cat": "ing23", "num": 21, "q": "It's 6:35 a.m. It's ______ in the morning.", "opts": ["thirty-five to six", "six to thirty-five", "twenty-five past seven", "twenty-five to seven"], "a": 3}, {"id": "ing23-22", "cat": "ing23", "num": 22, "q": "Complete the conversation with the correct reply. A: Amanda, this is Sarah from our technical office. B: ______", "opts": ["And you, Amanda?", "Same to you, Amanda.", "Very well, Amanda.", "Nice to meet you, Amanda."], "a": 3}, {"id": "ing23-23", "cat": "ing23", "num": 23, "q": "Which option is equivalent to the following sentence? «Can I have another piece of cake?»", "opts": ["I don't like this cake. Can I have something different?", "I'd like to eat another piece of cake.", "Would you like a piece of cake?", "Do you have another piece of cake?"], "a": 1}, {"id": "ing23-24", "cat": "ing23", "num": 24, "q": "There ______ hundreds of books on the table.", "opts": ["is", "are", "it is", "has"], "a": 1}, {"id": "ing23-25", "cat": "ing23", "num": 25, "q": "If you want to grow a lot of vegetables, you should have a large ______", "opts": ["garden", "kitchen", "fridge", "freezer"], "a": 0}, {"id": "ing23-26", "cat": "ing23", "num": 26, "q": "Which sign is equivalent to the following sentence? «The photocopying machine doesn't work.»", "opts": ["Photocopying machine out of order.", "Photocopying machine out of breath.", "Photocopying machine out of control.", "Photocopying machine out of stock."], "a": 0}, {"id": "ing23-27", "cat": "ing23", "num": 27, "q": "Find the right answer to the following question. Q: What do you do? A: ______", "opts": ["Nice to meet you, too.", "I work as a computer technician.", "I'm learning to play the violin.", "I'm fine, thanks. And you?"], "a": 1}, {"id": "ing23-28", "cat": "ing23", "num": 28, "q": "My toes are terribly cold. I should put on a pair of woollen ______", "opts": ["flip-flops", "socks", "gloves", "earrings"], "a": 1}, {"id": "ing23-29", "cat": "ing23", "num": 29, "q": "My father has a brother and a sister. They are my ______", "opts": ["fathers-in-law", "uncle and aunt", "grandfathers", "cousins"], "a": 1}, {"id": "ing23-30", "cat": "ing23", "num": 30, "q": "I am looking ______ her cats while she's on holiday.", "opts": ["for", "up", "after", "on"], "a": 2}, {"id": "ing23-31", "cat": "ing23", "num": 31, "q": "His new film is ______ the first one. I don't like it at all.", "opts": ["badder than", "worst than", "worse than", "worse that"], "a": 2}, {"id": "ing23-32", "cat": "ing23", "num": 32, "q": "I usually brush my teeth ______ I eat breakfast.", "opts": ["after", "before", "later", "while"], "a": 1}, {"id": "ing23-33", "cat": "ing23", "num": 33, "q": "You hear this dialogue (strawberry milkshake, to take away). Where are you?", "opts": ["In a library.", "In a clothes shop.", "In a shoe shop.", "In a café."], "a": 3}, {"id": "ing23-34", "cat": "ing23", "num": 34, "q": "Can I ______ your pen, please? I need to sign these documents.", "opts": ["forgive", "borrow", "behave", "lend"], "a": 1}, {"id": "ing23-35", "cat": "ing23", "num": 35, "q": "Which option is correct according to the following sightseeing trips notice?", "opts": ["You can't buy tickets on the bus.", "You must bring your own food and drink.", "There are sightseeing tours three days a week.", "Each voyage takes four hours."], "a": 0}, {"id": "ing23-36", "cat": "ing23", "num": 36, "q": "Find the right answer to the following question. Q: Could I try these jeans on? A: ______", "opts": ["Yes, of course. The changing rooms are over there.", "No, sorry. We can't give you refund.", "Sure! How would you like to pay?", "Just swipe your card and press the green button."], "a": 0}, {"id": "ing24-19", "cat": "ing24", "num": 19, "q": "How ______ chairs do we need for the meeting?", "opts": ["little", "much", "many", "few"], "a": 2}, {"id": "ing24-20", "cat": "ing24", "num": 20, "q": "Mr Brown is ______ football coach. She says he's the best.", "opts": ["the my daughter's", "my daughter's", "my daughters'", "my daughter"], "a": 1}, {"id": "ing24-21", "cat": "ing24", "num": 21, "q": "Three pairs of trousers for only €20! They are really ______", "opts": ["cheaps", "cheap", "easy", "expensives"], "a": 1}, {"id": "ing24-22", "cat": "ing24", "num": 22, "q": "Are you free next Sunday? ______ you like to go to a beach party?", "opts": ["Do", "Will", "Would", "Can"], "a": 2}, {"id": "ing24-23", "cat": "ing24", "num": 23, "q": "We got a message from our customer thanking ______ for our assistance.", "opts": ["us", "our", "ours", "we"], "a": 0}, {"id": "ing24-24", "cat": "ing24", "num": 24, "q": "What can you do if you read the following sign? «No left turn.»", "opts": ["Drive ahead or turn right.", "Look left before crossing.", "Stop the car.", "Turn back."], "a": 0}, {"id": "ing24-25", "cat": "ing24", "num": 25, "q": "Which option is correct according to the following sign? «No customers past this point. Employees and business visitors only.»", "opts": ["Some people can enter.", "Nobody can enter.", "In the past, customers couldn't enter, but now they can.", "Wait at this point if you are a business visitor."], "a": 0}, {"id": "ing24-26", "cat": "ing24", "num": 26, "q": "We need ______ tomatoes and ______ olive oil for this recipe.", "opts": ["a lot of - some", "many - lot", "some - many", "any - much"], "a": 0}, {"id": "ing24-27", "cat": "ing24", "num": 27, "q": "What does the following sentence mean? «You don't have to drink that.»", "opts": ["It's important that you drink that.", "You can't drink that. It's bad for you.", "Don't drink that. It's illegal.", "You don't need to drink that, but you can if you want to."], "a": 3}, {"id": "ing24-28", "cat": "ing24", "num": 28, "q": "Complete the conversation with a suitable reply. «I was born in Kenya but I grew up in London. What about you?»", "opts": ["I come from Naples, in the south of Italy.", "Nice to meet you too.", "Fine, thanks. And you?", "I work for an electrical company."], "a": 0}, {"id": "ing24-29", "cat": "ing24", "num": 29, "q": "Which option is true according to the following message? «Bike for sale. Ideal for someone starting and for use on roads. Plus 2 helmets for free.»", "opts": ["The scooter is free.", "The bicycle is suitable for beginners.", "You can buy a skateboard and some safety equipment.", "This motorbike can only be used on roads."], "a": 1}, {"id": "ing24-30", "cat": "ing24", "num": 30, "q": "If you want to buy a fridge, a microwave oven and a dishwasher, go to the ______ section.", "opts": ["sports equipment", "furniture", "toys", "electrical goods"], "a": 3}, {"id": "ing24-31", "cat": "ing24", "num": 31, "q": "It takes me about ______ hour to go to ______ work.", "opts": ["an - (no article)", "a - the", "an - the", "a - (no article)"], "a": 0}, {"id": "ing24-32", "cat": "ing24", "num": 32, "q": "Who are speaking in the following dialogue? (Toothache prescription dialogue)", "opts": ["A vet and a pet owner.", "A doctor and a patient.", "A pharmacist and a customer.", "A dentist and a nurse."], "a": 2}, {"id": "ing24-33", "cat": "ing24", "num": 33, "q": "Which option is true according to the following message? «Keep off. No skating on lake. Thin ice.»", "opts": ["Skating on the lake is dangerous because of poor ice conditions.", "Skating is forbidden because the roads near the lake are icy.", "You can't access the ice-skating area because it is closed.", "Ice conditions are bad for skating because the lake is too small."], "a": 0}, {"id": "ing24-34", "cat": "ing24", "num": 34, "q": "My car is being repaired. Can you give me a ______ to work tomorrow?", "opts": ["hold", "look", "hand", "lift"], "a": 3}, {"id": "ing24-35", "cat": "ing24", "num": 35, "q": "Which option is equivalent to the following sentence? «Richard was having dinner when the telephone rang.»", "opts": ["Richard started to cook his meal when the telephone rang.", "Richard got a phone call while he was eating some food in the evening.", "Richard prepared some food before the telephone rang.", "Richard received a phone call when he finished his dinner."], "a": 1}, {"id": "ing24-36", "cat": "ing24", "num": 36, "q": "Beatrice ______ a car. She's only 15 years old.", "opts": ["cannot to drive", "can't drive", "can't to drive", "can't drives"], "a": 1}, {"id": "gen23-37", "cat": "gen23", "num": 37, "q": "La Ley PRL determina las circunstancias que se deberán tener en cuenta para analizar las posibles situaciones de emergencia. Señalar la respuesta que NO responde a este criterio:", "opts": ["La edad de los trabajadores.", "El tamaño de la empresa.", "Actividad de la empresa.", "Posible presencia de personas ajenas a la empresa."], "a": 0}, {"id": "gen23-38", "cat": "gen23", "num": 38, "q": "Según el artículo 38 del RD 2395/2004, ¿a quién corresponde el control técnico y de eficacia en la gestión que ha de llevar a cabo el Administrador de Infraestructuras Ferroviarias?", "opts": ["Al Ministerio de Hacienda.", "A la Intervención General del Estado.", "Al Ministerio de Fomento, a través de la Dirección General de Ferrocarriles.", "Al Ministerio de Fomento, a través de la Secretaría General de Infraestructuras."], "a": 3}, {"id": "gen23-39", "cat": "gen23", "num": 39, "q": "¿Cuál de las siguientes respuestas se corresponde con el modo en el que la Ley PRL tiene previsto el desarrollo de la actividad formativa?", "opts": ["Se debe impartir con medios propios.", "El coste será compartido entre trabajador y empresario.", "Siempre que sea posible se llevará a cabo dentro de la jornada de trabajo.", "Se requiere un número mínimo de trabajadores para impartirse."], "a": 2}, {"id": "gen23-40", "cat": "gen23", "num": 40, "q": "Según la LO 3/2007, para la igualdad efectiva de mujeres y hombres, la capacidad y legitimación para intervenir en los procesos civiles, sociales y contencioso-administrativos que versen sobre la defensa del derecho a la igualdad:", "opts": ["Corresponden a las personas físicas determinadas en las Leyes reguladoras de estos procesos.", "Corresponden a las personas jurídicas con interés legítimo.", "Corresponden a las personas físicas y jurídicas con interés legítimo.", "Corresponden exclusivamente a las personas físicas afectadas."], "a": 2}, {"id": "gen23-41", "cat": "gen23", "num": 41, "q": "Según la disposición transitoria segunda del RD 2395/2004, ¿en qué expedientes de contratación gestionados por el GIF quedó subrogada ADIF?", "opts": ["En los que no se hubiera celebrado contrato.", "En los que se hubiera iniciado el expediente de contratación.", "En los que ya hubieran finalizado.", "En ninguno, la subrogación se realizó por parte de la Dirección General de Ferrocarriles."], "a": 1}, {"id": "gen23-42", "cat": "gen23", "num": 42, "q": "Es un derecho del trabajador en materia de prevención, reconocido en el art. 18 de la Ley PRL:", "opts": ["Evaluar los riesgos.", "Planificar la prevención.", "Aplicar las medidas de prevención.", "Efectuar propuestas al empresario dirigidas a la mejora de los niveles de protección."], "a": 3}, {"id": "gen23-43", "cat": "gen23", "num": 43, "q": "Conforme al Estatuto del ADIF, ¿qué requiere disponer con carácter previo al inicio de la explotación de una línea ferroviaria?", "opts": ["Exclusivamente la autorización del Consejo de Administración.", "La autorización del Consejo de Ministros.", "La convalidación de los operadores ferroviarios.", "La autorización del Ministerio de Fomento."], "a": 3}, {"id": "gen23-44", "cat": "gen23", "num": 44, "q": "Según la Ley 31/1995, en relación a los efectos de la designación de los Delegados de Prevención:", "opts": ["Los contratados por término de hasta un año se computarán según el número de días trabajados; cada doscientos días trabajados o fracción se computarán como un trabajador más.", "Los contratados por término de hasta dos años se computarán según días trabajados.", "Los contratados por término de hasta un año se computarán cada cien días trabajados.", "Únicamente podrán ser designados los trabajadores fijos de plantilla."], "a": 0}, {"id": "gen23-45", "cat": "gen23", "num": 45, "q": "La representación de los trabajadores en cuestiones relacionadas con la prevención de riesgos en el trabajo se constituirá en las empresas que cuenten con:", "opts": ["Cinco o más trabajadores.", "Diez o más trabajadores.", "Quince o más trabajadores.", "Seis o más trabajadores."], "a": 3}, {"id": "gen23-46", "cat": "gen23", "num": 46, "q": "Según la LO 3/2007, el Plan Estratégico de Igualdad de Oportunidades será aprobado:", "opts": ["Por el Consejo de Participación de la Mujer.", "Por el Gobierno, en las materias que sean de la competencia del Estado, de forma periódica.", "Por el Gobierno periódicamente cada 5 años.", "Por cada empresa, ya sea pública o privada."], "a": 1}, {"id": "gen23-47", "cat": "gen23", "num": 47, "q": "Según el Estatuto del ADIF, ¿qué incluye la administración de las infraestructuras ferroviarias integradas en la Red Ferroviaria de Interés General?", "opts": ["El transporte de viajeros y la comercialización.", "La explotación de los servicios de catering.", "Su mantenimiento y explotación, así como la gestión de sus sistemas de control, de circulación y de seguridad.", "Su mantenimiento y la prestación de servicios de transporte de viajeros."], "a": 2}, {"id": "gen23-48", "cat": "gen23", "num": 48, "q": "¿Cuál es la función de la Intervención General del Estado en el ADIF según su Estatuto?", "opts": ["Aprueba con carácter previo los recursos financieros.", "Realiza el control financiero anual a través del Tribunal de Cuentas.", "Realiza el control financiero permanente a través de la Intervención delegada.", "No interviene en la gestión económica de ADIF."], "a": 2}, {"id": "gen23-49", "cat": "gen23", "num": 49, "q": "Señale la opción INCORRECTA: según la LO 3/2007, dentro de las medidas de igualdad en el empleo para la Administración General del Estado se encuentra:", "opts": ["Conciliación y provisión de puestos de trabajo.", "Permisos y beneficios de protección a la maternidad.", "Designación de los Órganos de selección y Comisiones de valoración.", "Medidas de conciliación de la vida familiar y laboral."], "a": 2}, {"id": "gen23-50", "cat": "gen23", "num": 50, "q": "Según el artículo 3 del RD 2395/2004, ¿puede el ADIF prestar servicios de transporte ferroviario?", "opts": ["No, en ningún caso.", "Sí, en cualquier caso.", "No, salvo aquellos inherentes a su propia actividad.", "No, salvo aquellos en los que por circunstancias de emergencia no puedan ser prestados por un operador ferroviario."], "a": 2}, {"id": "gen23-51", "cat": "gen23", "num": 51, "q": "De conformidad con el artículo 54.5 del TREBEP, ¿cómo deben administrar los recursos y bienes públicos los empleados públicos?", "opts": ["Conforme al presupuesto anual aprobado.", "Con austeridad.", "Únicamente con la debida autorización de su superior jerárquico.", "Siguiendo las instrucciones del ciudadano peticionario."], "a": 1}, {"id": "gen23-52", "cat": "gen23", "num": 52, "q": "Según la Ley 31/1995, forman parte del derecho de los trabajadores a una protección eficaz en materia de seguridad y salud en el trabajo:", "opts": ["Los derechos de información, consulta y participación.", "Ejercer una labor de vigilancia y control sobre las condiciones de trabajo.", "Participar en la elaboración, puesta en práctica y evaluación de los planes de prevención.", "La adopción de las medidas necesarias en materia de primeros auxilios."], "a": 0}, {"id": "gen23-53", "cat": "gen23", "num": 53, "q": "¿Quién o quiénes NO estarán facultados para interrumpir la actividad ante un riesgo grave e inminente, según la Ley PRL?", "opts": ["El propio trabajador.", "Los representantes legales por mayoría.", "El Técnico de Prevención.", "Los delegados de Prevención por decisión mayoritaria."], "a": 2}, {"id": "gen23-54", "cat": "gen23", "num": 54, "q": "En virtud de la Ley 53/1984 de Incompatibilidades, ¿quién podrá determinar, con carácter general, las funciones, puestos o colectivos del sector público incompatibles con determinadas profesiones o actividades privadas?", "opts": ["Cada Ministerio respectivo.", "El Gobierno, por Real Decreto.", "La Administración de Justicia, por sentencia firme.", "Las Cortes Generales."], "a": 1}, {"id": "gen24-37", "cat": "gen24", "num": 37, "q": "Según la Declaración sobre la Red 2025, ¿cuál es la asociación mundial que promueve el transporte ferroviario a nivel global, a través de proyectos técnicos, investigación ferroviaria y soluciones estandarizadas?", "opts": ["EIM", "UIC", "PRIME", "CNMC"], "a": 1}, {"id": "gen24-38", "cat": "gen24", "num": 38, "q": "Según la Declaración sobre la Red 2025, ¿a quién corresponde garantizar, preservar y promover el correcto funcionamiento, la transparencia y la existencia de una competencia efectiva en todos los mercados y sectores productivos?", "opts": ["CNMV", "CNE", "CNMC", "UIC"], "a": 2}, {"id": "gen24-39", "cat": "gen24", "num": 39, "q": "Según la Declaración sobre la Red 2025, ¿a qué organismo público le corresponde el otorgamiento, suspensión y revocación de licencias a las empresas ferroviarias?", "opts": ["CNMC", "AESF", "ADIF", "ADIF ALTA VELOCIDAD"], "a": 1}, {"id": "gen24-40", "cat": "gen24", "num": 40, "q": "Según la Declaración sobre la Red 2025, ¿cuál es la organización que agrupa a los administradores de infraestructuras ferroviarias y organismos de adjudicación europeos?", "opts": ["UIC", "RNE", "EIM", "PRIME"], "a": 2}, {"id": "gen24-41", "cat": "gen24", "num": 41, "q": "Según su Estatuto, ¿puede ADIF recibir ingresos de convenios con otras Comunidades Autónomas, Entidades Locales o con entidades privadas?", "opts": ["No, ADIF no puede recibir este tipo de ingresos.", "Sí, constituyen un recurso económico más para la Entidad.", "Exclusivamente si se trata de entidades de derecho público.", "Exclusivamente si se trata de entidades de carácter privado."], "a": 1}, {"id": "gen24-42", "cat": "gen24", "num": 42, "q": "Conforme a la Ley 38/2015, del Sector Ferroviario, ¿qué función NO corresponde a los administradores ferroviarios?", "opts": ["La prestación, en su caso, de los servicios básicos de circulación.", "El control, vigilancia e inspección de las infraestructuras.", "La elaboración y ejecución de estudios o proyectos.", "La prestación de servicios de transporte comercial de viajeros o mercancías sobre las infraestructuras ferroviarias de su titularidad."], "a": 3}, {"id": "gen24-43", "cat": "gen24", "num": 43, "q": "Conforme al RD 53/1984 (Ley 30/1984, Estatuto de los Trabajadores del Estado), dicho Real Decreto no será de aplicación:", "opts": ["Al personal militar al servicio de la Administración del Estado.", "Al personal al servicio de las Corporaciones Locales.", "Al personal que preste servicios en empresas en las que la participación de capital público sea superior al 25 por 100.", "Al personal al servicio del Banco de España."], "a": 2}, {"id": "gen24-44", "cat": "gen24", "num": 44, "q": "¿A quién le corresponde autorizar las operaciones de crédito y demás operaciones de endeudamiento que pueda convenir ADIF, según su Estatuto?", "opts": ["Al Ministro de Fomento.", "Al Consejo de Administración de ADIF.", "Al Presidente de ADIF.", "Al Director General Económico Financiero."], "a": 1}, {"id": "gen24-45", "cat": "gen24", "num": 45, "q": "¿A quién le corresponde la aprobación y construcción de un proyecto de terminal de transporte de mercancías de la Red Ferroviaria de Interés General, según la Ley 38/2015?", "opts": ["Al Ministerio de Transportes, Movilidad y Agenda Urbana.", "A la Secretaría de Estado de Infraestructuras Ferroviarias.", "A los administradores de infraestructuras ferroviarias.", "A las empresas ferroviarias."], "a": 2}, {"id": "gen24-46", "cat": "gen24", "num": 46, "q": "Señale la opción INCORRECTA: según la LO 3/2007, para garantizar un igual derecho a la educación de mujeres y hombres, las Administraciones educativas desarrollarán las siguientes actuaciones:", "opts": ["La atención especial en los currículos.", "La integración del estudio y aplicación del principio de igualdad.", "La eliminación y el rechazo de los comportamientos y contenidos sexistas.", "El establecimiento de medidas educativas destinadas al reconocimiento y enseñanza del papel de las mujeres en la Historia."], "a": 0}, {"id": "gen24-47", "cat": "gen24", "num": 47, "q": "Según su Estatuto, ¿qué servicios de transporte ferroviarios puede prestar el ADIF?", "opts": ["Cualquier servicio ferroviario en plena libertad.", "Exclusivamente aquellos que sean inherentes a su propia actividad.", "Cualquier servicio que cuente con la autorización del Consejo de Ministros.", "Exclusivamente aquellos que puedan ser prestados por un operador privado."], "a": 1}, {"id": "gen24-48", "cat": "gen24", "num": 48, "q": "Según la LO 3/2007, con el fin de avanzar hacia un reparto equitativo de los tiempos entre mujeres y hombres, las corporaciones locales podrán establecer:", "opts": ["Programas de organización del tiempo de la ciudad.", "Planes Estatales de igualdad.", "Planes Municipales de organización del tiempo de la ciudad.", "Planes Autonómicos de igualdad."], "a": 2}, {"id": "gen24-49", "cat": "gen24", "num": 49, "q": "¿Cómo se delimita exteriormente la zona de protección de la línea ferroviaria en la Ley 38/2015?", "opts": ["Por dos líneas paralelas situadas a 70 metros de la arista exterior más próxima al eje de la plataforma.", "Por dos líneas paralelas situadas a 50 metros de la arista exterior más próxima al eje de la plataforma.", "Por dos líneas paralelas situadas a 70 metros de las aristas exteriores de explanación.", "Por dos líneas paralelas situadas a 50 metros de las aristas exteriores de explanación."], "a": 2}, {"id": "gen24-50", "cat": "gen24", "num": 50, "q": "Según la Ley 31/1995 de PRL, ¿qué es un riesgo laboral?", "opts": ["Las enfermedades, patologías o lesiones sufridas con motivo u ocasión del trabajo.", "Solo los accidentes graves.", "Solo las enfermedades profesionales.", "La posibilidad de que un trabajador sufra un determinado daño derivado del trabajo."], "a": 3}, {"id": "gen24-51", "cat": "gen24", "num": 51, "q": "Según la Ley 31/1995 de PRL, ¿qué deben hacer los empresarios en caso de riesgo grave e inminente?", "opts": ["Informar lo antes posible a los trabajadores afectados de la existencia de dicho riesgo y de las medidas adoptadas.", "Continuar con la actividad laboral hasta que las autoridades competentes lo determinen.", "Continuar con la actividad laboral hasta que los representantes legales de los trabajadores lo determinen.", "Despedir a los trabajadores afectados por su propia seguridad."], "a": 0}, {"id": "gen24-52", "cat": "gen24", "num": 52, "q": "¿Qué contenido debe tener la declaración sobre la red según la Ley 38/2015, del Sector Ferroviario?", "opts": ["La descripción de la infraestructura de uso exclusivo.", "Las características de la infraestructura puesta a disposición de las empresas ferroviarias y la información sobre la capacidad y condiciones técnicas de cada tramo de la red y sobre las condiciones de su acceso.", "El estudio de la planificación ferroviaria a largo plazo.", "Únicamente las características de la infraestructura de alta velocidad."], "a": 1}, {"id": "gen24-53", "cat": "gen24", "num": 53, "q": "Según la LO 3/2007, la presencia de mujeres y hombres de forma que, en el conjunto a que se refiera, las personas de cada sexo no superen el sesenta por ciento ni sean menos del cuarenta por ciento se entenderá como:", "opts": ["Organización distinguida con el distintivo empresarial en materia de igualdad.", "Empresa equilibrada.", "Presencia o composición equitativa.", "Presencia o composición equilibrada."], "a": 3}, {"id": "gen24-54", "cat": "gen24", "num": 54, "q": "Según la Declaración sobre la Red 2025, ¿cuántos milímetros tiene la separación entre carriles en la red de ancho estándar?", "opts": ["1.668 mm.", "1.535 mm.", "1.568 mm.", "1.435 mm."], "a": 3}, {"id": "esp23-1", "cat": "esp23", "num": 1, "q": "En aplicación del RD 223/2008, de 15 de febrero, indicar qué afirmación es correcta en relación al ámbito de aplicación:", "opts": ["A todas las líneas existentes antes de su entrada en vigor, sea cual sea su estado.", "A las líneas de corriente alterna trifásica a 60 Hz.", "Se aplica a las líneas eléctricas de alta tensión, entendiéndose como tales las de corriente alterna trifásica a 50 Hz de frecuencia, cuya tensión nominal eficaz entre fases sea superior a un kilovoltio.", "Corriente alterna trifásica a 50 Hz de frecuencia, cuya tensión nominal eficaz entre fases sea superior a tres kilovoltios."], "a": 2}, {"id": "esp23-2", "cat": "esp23", "num": 2, "q": "Según el RD 223/2008, la servidumbre de vuelo es la franja de terreno definida por la proyección sobre el suelo de los conductores extremos, más la distancia adicional de:", "opts": ["No se considera ninguna distancia adicional.", "5 metros.", "10 metros.", "15 metros."], "a": 0}, {"id": "esp23-3", "cat": "esp23", "num": 3, "q": "Según el RD 842/2002, para evitar el aumento de resistencia de las tomas de tierra debido a pérdida de humedad del suelo, presencia de hielo u otros efectos climáticos, su instalación se efectuará:", "opts": ["Se situará la toma de tierra a una profundidad mínima de 50 cm.", "Se dispondrá sobre la toma de tierra elementos aislantes térmicamente.", "Se deberá sobredimensionar la toma de tierra.", "Todas son correctas."], "a": 3}, {"id": "esp23-4", "cat": "esp23", "num": 4, "q": "En aplicación del RD 842/2002, se define como punto neutro de un sistema polifásico aquel que:", "opts": ["En las condiciones de simulación, presenta la misma diferencia de potencial entre los polos o fases del sistema.", "En las condiciones de funcionamiento previstas, presenta distinta diferencia de potencial.", "En las condiciones de funcionamiento previstas, presenta la misma diferencia de potencial, con relación a las masas del sistema eléctrico.", "En las condiciones de funcionamiento previstas, presenta la misma diferencia de potencial, con relación a cada uno de los polos o fases del sistema."], "a": 3}, {"id": "esp23-5", "cat": "esp23", "num": 5, "q": "En el RD 223/2008 se define un seccionador como:", "opts": ["Aparato mecánico de conexión que, por razones de seguridad, en posición abierta asegura una distancia de seccionamiento que satisface unas condiciones específicas de aislamiento.", "Aparato mecánico de desconexión del circuito.", "Aparato de conexión capaz de establecer, de soportar y de interrumpir las corrientes del circuito.", "Aparato de desconexión capaz de establecer y soportar corrientes en servicio normal."], "a": 0}, {"id": "esp23-6", "cat": "esp23", "num": 6, "q": "Según el RD 337/2014, la saturación de un transformador de intensidad, ¿a qué variables puede afectar?", "opts": ["Potencia de precisión.", "Relación de transformación.", "Ángulo de fase.", "Relación de transformación y ángulo de fase."], "a": 3}, {"id": "esp23-7", "cat": "esp23", "num": 7, "q": "Según el RD 842/2002, ITC-BT-01, ¿cómo se define una instalación de puesta a tierra?", "opts": ["Conjunto de conexiones y dispositivos necesarios para poner a tierra, individual o colectivamente, un aparato o una instalación.", "Conjunto de dispositivos necesarios para poner a tierra, colectivamente, un aparato o una instalación.", "Las piezas metálicas que forman parte de las canalizaciones.", "Conjunto de conexiones necesarias para poner a tierra, individualmente, cada aparato o instalación."], "a": 0}, {"id": "esp23-8", "cat": "esp23", "num": 8, "q": "Según el RD 223/2008, en los cruzamientos de líneas aéreas, se situará a mayor altura:", "opts": ["La de mayor tensión eléctrica.", "La de menor tensión eléctrica.", "La última que se instale.", "A igual tensión eléctrica, se acordará entre los propietarios de ambas líneas."], "a": 0}, {"id": "esp23-9", "cat": "esp23", "num": 9, "q": "En el RD 337/2014, se define interruptor automático como:", "opts": ["Aparato de conexión capaz de establecer, de soportar y de interrumpir las corrientes en las condiciones normales del circuito, que pueden incluir las condiciones especificadas de sobrecarga en servicio, así como de soportar durante un tiempo especificado las corrientes en las condiciones anormales especificadas del circuito, tales como las de cortocircuito.", "Interruptor que es capaz de interrumpir corrientes en condiciones anormales del circuito.", "Interruptor en el que la apertura o cierre del circuito se produce automáticamente por variación de un parámetro predeterminado.", "Aparato mecánico de conexión que, por razones de seguridad, en posición abierta asegura una distancia de seccionamiento."], "a": 0}, {"id": "esp23-10", "cat": "esp23", "num": 10, "q": "Aplicando el RD 842/2002, se denomina acometida:", "opts": ["Las instalaciones que unen la caja general de protección con la derivación individual.", "La parte de la instalación de la red de distribución que alimenta la caja o cajas generales de protección o unidad funcional equivalente.", "La derivación individual de un abonado.", "Las instalaciones interiores o receptoras."], "a": 1}, {"id": "esp23-11", "cat": "esp23", "num": 11, "q": "Según el RD 337/2014, ¿en qué aparato el movimiento de los contactos debe ser independiente de la actuación del operador?", "opts": ["Seccionador.", "Seccionador de puesta a tierra.", "Conmutador.", "Interruptor."], "a": 3}, {"id": "esp23-12", "cat": "esp23", "num": 12, "q": "En aplicación del RD 223/2008, respecto a compatibilidad con otras instalaciones se afirma:", "opts": ["Las líneas eléctricas de alta tensión en su diseño y explotación quedan exentas de tener en cuenta criterios de compatibilidad.", "Las líneas eléctricas de alta tensión deben estar dotadas de protecciones radioeléctricas exclusivas.", "Las líneas eléctricas de alta tensión deben estar dotadas de los elementos necesarios para que su explotación e incidencias no produzcan perturbaciones anormales en el funcionamiento de otras instalaciones.", "Las líneas quedan exceptuadas de compatibilidad en caso de incidencias."], "a": 2}, {"id": "esp23-13", "cat": "esp23", "num": 13, "q": "Según el RCF, ¿cómo se define el cantón de bloqueo en BSL?", "opts": ["Tramo de vía comprendido entre señales que pueden presentar la indicación de parada y en el que, en circunstancias normales, solo puede haber un tren.", "Parte de la vía comprendida entre dos estaciones colaterales abiertas a la circulación.", "Parte de la vía comprendida entre dos señales consecutivas de bloqueo.", "Tramo de vía comprendido entre dos señales de entrada."], "a": 0}, {"id": "esp23-14", "cat": "esp23", "num": 14, "q": "En el RD 337/2014, ¿cuál es la definición de poner o conectar a tierra?", "opts": ["Es la conexión que tiene por objeto unir a tierra temporalmente parte de las instalaciones.", "Unir eléctricamente un conductor al armazón de una máquina.", "Es la conexión directa a tierra de las partes conductoras de los elementos de una instalación no sometidos normalmente a tensión eléctrica.", "Unir eléctricamente con la tierra una parte del circuito eléctrico o una parte conductora no perteneciente al mismo por medio de la instalación de tierra."], "a": 3}, {"id": "esp23-15", "cat": "esp23", "num": 15, "q": "En aplicación del estudio de calidad de la energía en el sistema eléctrico y su aplicación al sistema ferroviario, indicar cuál NO se corresponde con aspectos que se deben cumplir respecto a la Calidad del Servicio:", "opts": ["La continuidad del suministro, relativa al número y la duración de las interrupciones.", "La calidad de la forma de onda de tensión, principalmente las variaciones del valor eficaz de la tensión y de la frecuencia.", "Se establece un máximo de interrupciones para incidencias de interrupción superiores a 5 minutos.", "La calidad de atención y relación con el cliente, en lo que se refiere a asesoramiento en materia de contratación."], "a": 2}, {"id": "esp23-16", "cat": "esp23", "num": 16, "q": "En aplicación del RD 337/2014, ¿qué tipo de instalación es aquella destinada a la conexión entre dos o más circuitos y su maniobra?", "opts": ["Subestación.", "Subestación de transformación.", "Subestación de maniobra.", "Subestación móvil."], "a": 2}, {"id": "esp23-17", "cat": "esp23", "num": 17, "q": "En aplicación del RD 223/2008, ¿cómo se denomina a una tensión anormal en un lugar determinado de la red, relativamente larga y que no está amortiguada?", "opts": ["Sobretensión.", "Sobretensión temporal.", "Sobretensión tipo maniobra.", "Sobretensión tipo rayo."], "a": 1}, {"id": "esp23-18", "cat": "esp23", "num": 18, "q": "Según el RD 223/2008, si el punto de anclaje del cable de tierra a la torre está más alto que el del conductor, la flecha del cable de tierra respecto a la flecha de los conductores será:", "opts": ["Igual o mayor.", "Inferior.", "Igual o inferior.", "Indiferente mientras se respete la distancia mínima de separación entre ellos."], "a": 2}, {"id": "esp24-1", "cat": "esp24", "num": 1, "q": "En el RD 337/2014, ¿cómo se define la tensión nominal de una red trifásica?", "opts": ["Es la tensión asignada por el fabricante para el material.", "Es el valor de la tensión especificada, que un aislamiento debe soportar.", "Es el valor eficaz de una tensión alterna sinusoidal a frecuencia industrial.", "Valor de la tensión entre fases por el cual se denomina la red, y a la cual se refieren ciertas características de servicio de la red."], "a": 3}, {"id": "esp24-2", "cat": "esp24", "num": 2, "q": "Según el RD 842/2002, se clasifica como tensiones nominales usuales de corriente continua aquellas que están comprendidas entre:", "opts": ["Un ≤ 50 V", "500 < Un ≤ 1000 V", "750 < Un ≤ 1500 V", "75 < Un ≤ 750 V"], "a": 3}, {"id": "esp24-3", "cat": "esp24", "num": 3, "q": "Según el artículo 1.5.1.1 Señales y agujas del RCF, ¿en cuál de los siguientes sistemas de bloqueo podemos encontrar una señal preavanzada?", "opts": ["BA", "BCA", "BLA", "BSL"], "a": 2}, {"id": "esp24-4", "cat": "esp24", "num": 4, "q": "En el RD 337/2014 se define la Resistencia de Tierra como:", "opts": ["Es la resistencia entre un conductor y el suelo.", "Es la resistencia entre las diferentes picas de tierra.", "Es la resistencia entre el conductor neutro y el conductor de tierra.", "Es la resistencia entre un conductor puesto a tierra y un punto de potencial cero."], "a": 3}, {"id": "esp24-5", "cat": "esp24", "num": 5, "q": "En aplicación del RD 842/2002, ¿qué característica deben cumplir los Materiales de Clase II?", "opts": ["Material en el cual la protección contra el choque eléctrico no se basa únicamente en el aislamiento principal.", "Material en el cual la protección contra el choque eléctrico no se basa en la alimentación a muy baja tensión.", "Material en el cual la protección contra el choque eléctrico no se basa únicamente en el aislamiento principal, sino que comporta medidas de seguridad complementarias, tales como el doble aislamiento.", "Material en el cual la protección contra el choque eléctrico no supone la utilización de puesta a tierra."], "a": 2}, {"id": "esp24-6", "cat": "esp24", "num": 6, "q": "Según el RD 337/2014, para eliminación de sobretensiones en líneas de alta tensión se utiliza, entre otros:", "opts": ["Interruptores de desconexión automática.", "Fusibles.", "Autoválvulas.", "Puestas a tierra."], "a": 2}, {"id": "esp24-7", "cat": "esp24", "num": 7, "q": "En aplicación del RD 842/2002, las instalaciones eléctricas se ejecutarán por empresas instaladoras en baja tensión:", "opts": ["Que serán aquellas personas físicas, que con la titulación adecuada acrediten.", "Que serán aquellas personas físicas o jurídicas que hayan presentado la declaración responsable de inicio de actividad según se establece en la correspondiente instrucción técnica complementaria.", "Que serán aquellas personas físicas o jurídicas que estén inscritas en el registro de la Administración competente.", "Que serán aquellas personas jurídicas que hayan presentado el informe de inicio de actividad."], "a": 1}, {"id": "esp24-8", "cat": "esp24", "num": 8, "q": "El Reglamento electrotécnico para baja tensión aprobado en el RD 842/2002 es de aplicación para tensiones nominales de corriente alterna de:", "opts": ["Igual o inferior a 3.300 voltios.", "Igual o inferior a 1.750 voltios.", "Igual o inferior a 1.000 voltios.", "Igual o inferior a 1.500 voltios."], "a": 2}, {"id": "esp24-9", "cat": "esp24", "num": 9, "q": "Según el RD 223/2008, para una línea eléctrica de Alta Tensión, la distancia de los conductores a la rasante de una carretera no podrá ser en ningún caso menor a:", "opts": ["4 metros.", "7 metros.", "10 metros.", "12 metros."], "a": 1}, {"id": "esp24-10", "cat": "esp24", "num": 10, "q": "En aplicación del RD 223/2008, ¿qué afirmación es correcta respecto de las inspecciones periódicas de las líneas?", "opts": ["Se efectuarán inspecciones periódicas de las líneas. Estas inspecciones se realizarán cada cinco años, al menos.", "Las inspecciones periódicas se realizarán por los organismos de instalación autorizados exclusivamente.", "Se efectuarán inspecciones periódicas de las líneas. Estas inspecciones se realizarán cada tres años, al menos.", "La Administración pública competente propondrá planes de inspección sin obligación de cumplimiento."], "a": 2}, {"id": "esp24-11", "cat": "esp24", "num": 11, "q": "En aplicación del RD 223/2008, indicar la opción falsa teniendo en cuenta el Artículo 1 (Objeto):", "opts": ["Proteger las personas y la integridad y funcionalidad de los bienes.", "Conseguir la necesaria regularidad en los suministros de energía eléctrica.", "Establecer normas para hacer compatibles la extensa tipificación que existe en la fabricación de material eléctrico, así como las nuevas denominaciones que vayan apareciendo.", "Facilitar desde la fase de proyecto de las líneas su adaptación a los futuros aumentos de carga."], "a": 2}, {"id": "esp24-12", "cat": "esp24", "num": 12, "q": "En el RD 223/2008, se denomina tensión a tierra transferida:", "opts": ["Es la tensión de paso o de contacto que puede aparecer en un lugar cualquiera transmitida por un elemento metálico de la propia instalación.", "Es la tensión de paso o de contacto que puede aparecer en un lugar cualquiera transmitida por un elemento metálico desde una instalación de tierra a cierta distancia.", "Es la tensión entre elementos activos del sistema.", "Es la tensión de paso o de contacto que puede aparecer en un lugar cualquiera transmitida por un elemento metálico desde una instalación de tierra lejana."], "a": 3}, {"id": "esp24-13", "cat": "esp24", "num": 13, "q": "En el RD 223/2008, se define CONTACTO INDIRECTO como:", "opts": ["Contacto de personas o animales con partes que se han puesto en tensión.", "Contacto de personas o animales con partes que se han puesto en tensión debido al uso de herramientas o útiles.", "Contacto de personas o animales con partes que se han puesto en tensión por causas de terceros.", "Contacto de personas o animales con partes que se han puesto en tensión como resultado de una falta de aislamiento."], "a": 3}, {"id": "esp24-14", "cat": "esp24", "num": 14, "q": "Según el RD 223/2008, las líneas clasificadas de segunda categoría son aquellas cuya tensión nominal es:", "opts": ["Igual o inferior a 36 kV.", "Igual o inferior a 40 kV y superior a 30 kV.", "Igual o inferior a 66 kV y superior a 30 kV.", "Inferior a 220 kV y superior a 66 kV."], "a": 2}, {"id": "esp24-15", "cat": "esp24", "num": 15, "q": "Para el suministro en el ámbito ferroviario, ¿qué Norma Europea establece las principales características que han de cumplir las tensiones de alimentación?", "opts": ["IEEE 1159", "IEC 61000-4-30", "EN 50160", "EN 50163"], "a": 3}, {"id": "esp24-16", "cat": "esp24", "num": 16, "q": "En aplicación del RD 223/2008, ¿qué se entiende por tensión de defecto?", "opts": ["Es la parte de la tensión a tierra que aparece en caso de un defecto a tierra entre dos puntos del terreno separados a un metro.", "Tensión que aparece a causa de un defecto de aislamiento, entre dos masas, entre una masa y un elemento conductor, o entre una masa y tierra.", "Tensión que aparece a causa de un defecto de aislamiento, entre una masa y tierra.", "Es la fracción de la tensión de puesta a tierra que puede ser puenteada por una persona entre la mano y un punto del terreno."], "a": 2}, {"id": "esp24-17", "cat": "esp24", "num": 17, "q": "En aplicación del RD 337/2014, ¿cuál de las siguientes afirmaciones es falsa respecto de especificaciones particulares de las instalaciones propiedad de las entidades de transporte y distribución de energía eléctrica?", "opts": ["En ningún caso estas especificaciones incluirán marcas o modelos de equipos.", "Las empresas de transporte y distribución podrán establecer especificaciones particulares.", "Estas especificaciones podrán variar en el territorio de distribución de la empresa distribuidora y podrán definir aspectos de diseño, materiales, construcción, montaje y puesta en servicio.", "Una persona técnica competente certificará que las especificaciones particulares cumplen la normativa."], "a": 0}, {"id": "esp24-18", "cat": "esp24", "num": 18, "q": "En aplicación del RD 842/2002, indicar qué afirmación es la correcta:", "opts": ["Persona cualificada es aquella que teniendo una titulación homologada adecuada.", "Persona cualificada es aquella que teniendo una experiencia mínima de tres años.", "Se considera una persona cualificada aquella que está suficientemente informada.", "Persona cualificada es aquella que, teniendo conocimientos técnicos o experiencia suficiente, puede evitar los peligros que pueda presentar la electricidad."], "a": 3}];
+
+const CATS = {
+  ing23:{name:"Inglés",year:2023,cls:"t-ing",desc:"Bloque General · Idiomas"},
+  ing24:{name:"Inglés",year:2024,cls:"t-ing",desc:"Bloque General · Idiomas"},
+  gen23:{name:"Conocimiento General",year:2023,cls:"",desc:"Bloque General"},
+  gen24:{name:"Conocimiento General",year:2024,cls:"",desc:"Bloque General"},
+  esp23:{name:"Parte Específica",year:2023,cls:"t-esp",desc:"Montador Eléctrico"},
+  esp24:{name:"Parte Específica",year:2024,cls:"t-esp",desc:"Montador Eléctrico"}
+};
+const CAT_ORDER = ["ing23","ing24","gen23","gen24","esp23","esp24"];
+const KEYS = ["A","B","C","D"];
+
+/* ═══════════════ ALMACENAMIENTO ═══════════════ */
+const STORE_KEY = "adif-oep-2026-v1";
+let store = {};
+try{ store = JSON.parse(localStorage.getItem(STORE_KEY)) || {}; }catch(e){ store = {}; }
+function save(){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(store)); }catch(e){} }
+function rec(qid){ return store[qid] || {r:0,w:0,m:false}; }
+function bump(qid, ok){
+  const e = rec(qid); ok ? e.r++ : e.w++;
+  if(ok && e.r >= 2) e.m = true;   /* 2 aciertos → dominada */
+  store[qid] = e; save(); refreshFlaps();
+}
+function toggleMastered(qid){
+  const e = rec(qid); e.m = !e.m; store[qid] = e; save(); refreshFlaps();
+}
+
+/* ═══════════════ TABLERO DE SALIDAS ═══════════════ */
+function refreshFlaps(){
+  let m=0, att=0, ok=0, ko=0;
+  QUESTIONS.forEach(q=>{ const e=rec(q.id); if(e.m)m++; if(e.r+e.w>0)att++; ok+=e.r; ko+=e.w; });
+  document.getElementById("flap-mastered").textContent = m + "/" + QUESTIONS.length;
+  document.getElementById("flap-attempts").textContent = att;
+  document.getElementById("flap-accuracy").textContent = (ok+ko)>0 ? Math.round(100*ok/(ok+ko)) + "%" : "—";
+}
+
+/* ═══════════════ NAVEGACIÓN ═══════════════ */
+let mode = "exam";
+document.querySelectorAll("nav.tabs button").forEach(b=>{
+  b.addEventListener("click", ()=>{
+    mode = b.dataset.mode;
+    document.querySelectorAll("nav.tabs button").forEach(x=>x.classList.toggle("active", x===b));
+    document.querySelectorAll("section.view").forEach(s=>s.classList.remove("active"));
+    document.getElementById("view-"+mode).classList.add("active");
+    if(mode==="study") renderStudy();
+    if(mode==="stats") renderStats();
+  });
+});
+
+/* ═══════════════ FILTROS ═══════════════ */
+function buildFilters(containerId, onChange, activeRef, getActive){
+  const c = document.getElementById(containerId); c.innerHTML = "";
+  const mk = (val,label)=>{
+    const b=document.createElement("button");
+    b.className="chip" + (getActive()===val?" active":"");
+    b.dataset.val=val; b.innerHTML=label;
+    b.addEventListener("click",()=>{ activeRef.v=val; onChange(); buildFilters(containerId,onChange,activeRef,getActive); });
+    c.appendChild(b);
+  };
+  mk("all","Todas <span class='cnt'>"+QUESTIONS.length+"</span>");
+  CAT_ORDER.forEach(k=>{
+    const n=QUESTIONS.filter(q=>q.cat===k).length;
+    mk(k, CATS[k].name+" "+CATS[k].year+" <span class='cnt'>"+n+"</span>");
+  });
+}
+const examCat={v:"all"}, studyCat={v:"all"};
+
+/* ═══════════════ MODO EXAMEN ═══════════════ */
+let current=null, locked=false, lastId=null;
+let scoreOk=0, scoreTot=0;
+
+function pool(){ return examCat.v==="all" ? QUESTIONS : QUESTIONS.filter(q=>q.cat===examCat.v); }
+
+function newQuestion(){
+  const p = pool();
+  if(p.length===0) return;
+  let q, guard=0;
+  do{ q = p[Math.floor(Math.random()*p.length)]; guard++; }
+  while(p.length>1 && q.id===lastId && guard<25);
+  lastId=q.id; current=q; locked=false;
+
+  const c = CATS[q.cat];
+  const st = rec(q.id);
+  document.getElementById("exam-stage").innerHTML = `
+    <div class="qcard">
+      <div class="qmeta">
+        <span class="qtag ${c.cls}">${c.name} · ${c.year}</span>
+        <span class="qnum">PREGUNTA Nº ${q.num} ${st.r+st.w>0?("· <span style='color:var(--brass)'>◈ "+st.r+"✓ "+st.w+"✗</span>"):""}</span>
+      </div>
+      <div class="qtext">${esc(q.q)}</div>
+      <div class="opts" id="opts">
+        ${q.opts.map((o,i)=>`<button class="opt" data-i="${i}"><span class="key">${KEYS[i]}</span><span>${esc(o)}</span><span class="mark"></span></button>`).join("")}
+      </div>
+      <div class="verdict" id="verdict"></div>
+    </div>`;
+  document.querySelectorAll("#opts .opt").forEach(btn=>{
+    btn.addEventListener("click", ()=> answer(parseInt(btn.dataset.i,10)));
+  });
+  document.getElementById("btn-next").disabled = true;
+  updateScoreLine();
+}
+
+function answer(i){
+  if(locked || !current) return;
+  locked=true;
+  const q=current, good = (i===q.a);
+  const btns=document.querySelectorAll("#opts .opt");
+  btns.forEach((b,bi)=>{
+    b.disabled=true;
+    if(bi===q.a){ b.classList.add("correct"); b.querySelector(".mark").textContent="CORRECTA"; }
+    else if(bi===i){ b.classList.add("wrong"); b.querySelector(".mark").textContent="TU RESPUESTA"; }
+  });
+  const v=document.getElementById("verdict");
+  v.className="verdict show "+(good?"good":"bad");
+  v.innerHTML = good
+    ? `<div class="vt">✔ Vía libre — respuesta correcta</div><div class="vs">La opción <b>${KEYS[q.a]}</b> es la correcta. ${rec(q.id).m?"(Pregunta dominada ◈)":""}</div>`
+    : `<div class="vt">✘ Señal en parada — respuesta incorrecta</div><div class="vs">La opción correcta era la <b>${KEYS[q.a]}</b>: ${esc(q.opts[q.a])}</div>`;
+  if(good) scoreOk++;
+  scoreTot++;
+  bump(q.id, good);
+  updateScoreLine();
+  document.getElementById("btn-next").disabled=false;
+  document.getElementById("btn-next").focus();
+}
+
+function updateScoreLine(){
+  document.getElementById("exam-score").innerHTML =
+    "Aciertos: <b>"+scoreOk+"</b> de "+scoreTot+(scoreTot?(" · "+Math.round(100*scoreOk/scoreTot)+"%"):"");
+}
+
+document.getElementById("btn-next").addEventListener("click", newQuestion);
+document.getElementById("btn-reset-score").addEventListener("click", ()=>{
+  scoreOk=0; scoreTot=0; lastId=null; updateScoreLine(); newQuestion();
+});
+
+/* Atajos de teclado */
+document.addEventListener("keydown", e=>{
+  if(mode!=="exam") return;
+  const map={"1":0,"2":1,"3":2,"4":3,"a":0,"b":1,"c":2,"d":3};
+  const k=e.key.toLowerCase();
+  if(k in map && !locked){ answer(map[k]); }
+  else if(e.key==="Enter" && locked){ newQuestion(); }
+});
+
+/* ═══════════════ MODO ESTUDIO ═══════════════ */
+function renderStudy(){
+  const list=document.getElementById("study-list"); list.innerHTML="";
+  const items = studyCat.v==="all" ? QUESTIONS : QUESTIONS.filter(q=>q.cat===studyCat.v);
+  items.forEach(q=>{
+    const c=CATS[q.cat], st=rec(q.id);
+    const card=document.createElement("div");
+    card.className="study-card"+(st.m?" mastered-card":"");
+    card.innerHTML=`
+      <div class="qmeta">
+        <span class="qtag ${c.cls}">${c.name} · ${c.year}</span>
+        <span class="qnum">Nº ${q.num}${st.r+st.w>0?(" · "+st.r+"✓ "+st.w+"✗"):""}</span>
+      </div>
+      <div class="qtext">${esc(q.q)}</div>
+      <div class="opts">${q.opts.map((o,i)=>`<div class="opt" data-i="${i}"><span class="key">${KEYS[i]}</span><span>${esc(o)}</span></div>`).join("")}</div>
+      <div class="study-actions">
+        <button class="mini-btn btn-reveal">👁 Ver respuesta</button>
+        <button class="mini-btn btn-master ${st.m?"mastered":""}">${st.m?"◈ Dominada":"Marcar dominada"}</button>
+      </div>`;
+    card.querySelector(".btn-reveal").addEventListener("click", ev=>{
+      const opts=card.querySelectorAll(".opt");
+      opts.forEach((o,oi)=>{ if(oi===q.a) o.classList.add("reveal-correct"); });
+      ev.target.textContent="✔ Respuesta: "+KEYS[q.a];
+      ev.target.disabled=true;
+    });
+    card.querySelector(".btn-master").addEventListener("click", ev=>{
+      toggleMastered(q.id);
+      const m=rec(q.id).m;
+      card.classList.toggle("mastered-card", m);
+      ev.target.classList.toggle("mastered", m);
+      ev.target.textContent = m ? "◈ Dominada" : "Marcar dominada";
+    });
+    list.appendChild(card);
+  });
+}
+
+/* ═══════════════ ESTADÍSTICAS ═══════════════ */
+function renderStats(){
+  const board=document.getElementById("stats-board"); board.innerHTML="";
+  let tM=0,tAtt=0,tOk=0,tKo=0;
+  CAT_ORDER.forEach(k=>{
+    const qs=QUESTIONS.filter(q=>q.cat===k);
+    let m=0,att=0,ok=0,ko=0;
+    qs.forEach(q=>{ const e=rec(q.id); if(e.m)m++; if(e.r+e.w>0)att++; ok+=e.r; ko+=e.w; });
+    tM+=m; tAtt+=att; tOk+=ok; tKo+=ko;
+    const acc=(ok+ko)>0?Math.round(100*ok/(ok+ko)):0;
+    const row=document.createElement("div");
+    row.className="stat-row";
+    row.innerHTML=`
+      <div class="stat-head">
+        <span class="stat-name">${CATS[k].name}<span class="yr">${CATS[k].year}</span></span>
+        <span class="stat-nums">DOMINADAS ${m}/${qs.length} · CONTESTADAS ${att}/${qs.length} · PRECISIÓN ${acc}%</span>
+      </div>
+      <div class="bar" title="Dominadas"><div class="fill" style="width:${Math.round(100*m/qs.length)}%"></div></div>
+      <div class="bar" style="margin-top:.35rem" title="Precisión"><div class="fill gold" style="width:${acc}%"></div></div>`;
+    board.appendChild(row);
+  });
+  const tAcc=(tOk+tKo)>0?Math.round(100*tOk/(tOk+tKo)):0;
+  const total=document.createElement("div");
+  total.className="stat-row";
+  total.style.borderColor="var(--brass)";
+  total.innerHTML=`
+    <div class="stat-head">
+      <span class="stat-name" style="font-size:1.3rem">◈ TOTAL DEL MATERIAL</span>
+      <span class="stat-nums">DOMINADAS ${tM}/${QUESTIONS.length} · CONTESTADAS ${tAtt}/${QUESTIONS.length} · PRECISIÓN GLOBAL ${tAcc}%</span>
+    </div>
+    <div class="bar"><div class="fill" style="width:${Math.round(100*tM/QUESTIONS.length)}%"></div></div>
+    <div class="bar" style="margin-top:.35rem"><div class="fill gold" style="width:${tAcc}%"></div></div>`;
+  board.appendChild(total);
+}
+
+document.getElementById("btn-wipe").addEventListener("click", ()=>{
+  if(confirm("¿Borrar todo el progreso guardado? Esta acción no tiene marcha atrás.")){
+    store={}; save(); refreshFlaps(); renderStats();
+  }
+});
+
+/* ═══════════════ UTILIDADES ═══════════════ */
+function esc(s){
+  return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+
+/* ═══════════════ ARRANQUE ═══════════════ */
+buildFilters("exam-filters", ()=>{ lastId=null; newQuestion(); }, examCat, ()=>examCat.v);
+buildFilters("study-filters", ()=>renderStudy(), studyCat, ()=>studyCat.v);
+refreshFlaps();
+newQuestion();
+</script>
+</body>
+</html>
