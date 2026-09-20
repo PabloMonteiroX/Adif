@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>ADIF · OEP 2026 — Simulador Montador Eléctrico</title>
 <meta name="description" content="Simulador de exámenes ADIF OEP 2026 — Perfil 26/11PO Montador Eléctrico IISS. 108 preguntas oficiales de convocatorias 2023 y 2024.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -42,7 +42,9 @@ body{
     radial-gradient(ellipse at 20% -10%, rgba(255,252,240,.7), transparent 55%),
     radial-gradient(ellipse at 90% 110%, rgba(160,124,44,.10), transparent 50%);
   min-height:100vh;
-  line-height:1.55;
+  min-height:100svh;
+  line-height:1.65;
+  overflow-x:hidden;
 }
 ::selection{background:var(--brass-soft);color:var(--green-deep)}
 
@@ -104,9 +106,9 @@ nav.tabs{
   position:relative;z-index:2;padding-bottom:2rem;
 }
 nav.tabs button{
-  font-family:'IBM Plex Mono',monospace;font-size:.72rem;letter-spacing:.22em;text-transform:uppercase;
+  font-family:'IBM Plex Mono',monospace;font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;
   background:transparent;color:rgba(246,239,220,.65);
-  border:1px solid rgba(194,160,85,.45);padding:.6rem 1.3rem;cursor:pointer;
+  border:1px solid rgba(194,160,85,.45);min-height:44px;padding:.7rem 1rem;cursor:pointer;
   border-radius:2px;transition:all .22s ease;
 }
 nav.tabs button:hover{border-color:var(--brass-soft);color:var(--paper-2)}
@@ -124,9 +126,9 @@ section.view.active{display:block;animation:fadeUp .35s ease}
 /* ═══════════════ FICHAS DE FILTRO ═══════════════ */
 .filter-bar{display:flex;flex-wrap:wrap;gap:.45rem;justify-content:center;margin-bottom:1.8rem}
 .chip{
-  font-family:'IBM Plex Mono',monospace;font-size:.64rem;letter-spacing:.14em;text-transform:uppercase;
+  font-family:'IBM Plex Mono',monospace;font-size:.76rem;letter-spacing:.04em;text-transform:uppercase;
   background:var(--paper-2);color:var(--ink-soft);border:1px solid var(--line);
-  padding:.42rem .85rem;cursor:pointer;border-radius:2px;transition:all .18s ease;
+  min-height:44px;padding:.65rem .85rem;cursor:pointer;border-radius:2px;transition:all .18s ease;
 }
 .chip:hover{border-color:var(--brass);color:var(--ink)}
 .chip.active{background:var(--green);border-color:var(--green);color:var(--paper-2)}
@@ -160,14 +162,14 @@ section.view.active{display:block;animation:fadeUp .35s ease}
   font-family:'IBM Plex Mono',monospace;font-size:.68rem;color:var(--ink-faint);letter-spacing:.18em;
 }
 .qtext{
-  font-family:'Cormorant Garamond',serif;font-size:1.28rem;font-weight:600;line-height:1.45;
+  font-family:'Cormorant Garamond',serif;font-size:clamp(1.3rem, 4.8vw, 1.65rem);font-weight:600;line-height:1.5;
   margin-bottom:1.4rem;color:var(--ink);
 }
 .opts{display:flex;flex-direction:column;gap:.55rem}
 .opt{
   display:flex;align-items:flex-start;gap:.85rem;text-align:left;width:100%;
   background:transparent;border:1px solid var(--line);border-radius:2px;
-  padding:.72rem .95rem;cursor:pointer;font-family:'Spectral',serif;font-size:.98rem;color:var(--ink);
+  min-height:52px;padding:.8rem .95rem;cursor:pointer;font-family:'Spectral',serif;font-size:1.05rem;color:var(--ink);
   transition:background .15s ease,border-color .15s ease;position:relative;
 }
 .opt .key{
@@ -204,8 +206,8 @@ section.view.active{display:block;animation:fadeUp .35s ease}
   margin-top:1.6rem;
 }
 .btn{
-  font-family:'IBM Plex Mono',monospace;font-size:.7rem;letter-spacing:.22em;text-transform:uppercase;
-  background:var(--green);color:var(--paper-2);border:none;padding:.78rem 1.6rem;cursor:pointer;
+  font-family:'IBM Plex Mono',monospace;font-size:.76rem;letter-spacing:.08em;text-transform:uppercase;
+  background:var(--green);color:var(--paper-2);border:none;min-height:48px;padding:.82rem 1.1rem;cursor:pointer;
   border-radius:2px;transition:all .2s ease;border:1px solid var(--green);
 }
 .btn:hover{background:var(--green-deep)}
@@ -232,9 +234,45 @@ section.view.active{display:block;animation:fadeUp .35s ease}
 .study-card .opt.reveal-correct .key{background:var(--ok);border-color:var(--ok);color:var(--paper-2)}
 .study-actions{display:flex;gap:.5rem;margin-top:.9rem;flex-wrap:wrap}
 .mini-btn{
-  font-family:'IBM Plex Mono',monospace;font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;
+  font-family:'IBM Plex Mono',monospace;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;
   background:transparent;border:1px solid var(--line);color:var(--ink-soft);
-  padding:.42rem .9rem;cursor:pointer;border-radius:2px;transition:all .18s ease;
+  min-height:44px;padding:.65rem .9rem;cursor:pointer;border-radius:2px;transition:all .18s ease;
+}
+:focus-visible{
+  outline:3px solid var(--brass);
+  outline-offset:3px;
+}
+
+@media (prefers-reduced-motion: reduce){
+  *,
+  *::before,
+  *::after{
+    scroll-behavior:auto !important;
+    animation-duration:.01ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:.01ms !important;
+  }
+}
+
+@media (prefers-color-scheme: dark){
+  :root{
+    --paper:#171914;
+    --paper-2:#22251f;
+    --paper-3:#30352b;
+    --ink:#f1ead8;
+    --ink-soft:#c5bda9;
+    --ink-faint:#a69e8b;
+    --line:#6c654f;
+    --ok-bg:#20382a;
+    --bad-bg:#432622;
+    --shadow:rgba(0,0,0,.45);
+  }
+
+  body{
+    background-image:
+      radial-gradient(ellipse at 20% -10%, rgba(255,255,255,.04), transparent 55%),
+      radial-gradient(ellipse at 90% 110%, rgba(194,160,85,.06), transparent 50%);
+  }
 }
 .mini-btn:hover{border-color:var(--brass);color:var(--ink)}
 .mini-btn.mastered{background:var(--ok);border-color:var(--ok);color:var(--paper-2)}
@@ -274,11 +312,68 @@ footer .f-title{font-family:'Cormorant Garamond',serif;font-style:italic;font-si
 
 /* ═══════════════ RESPONSIVE ═══════════════ */
 @media (max-width:560px){
-  .qcard{padding:1.3rem 1.1rem 1.2rem}
-  .qcard::before,.qcard::after{left:1.1rem;right:1.1rem}
-  .exam-controls{justify-content:center}
-  .flap{min-width:100px;padding:.4rem .8rem}
+  .masthead{
+    padding-top:calc(1.35rem + env(safe-area-inset-top));
+    padding-left:max(1rem, env(safe-area-inset-left));
+    padding-right:max(1rem, env(safe-area-inset-right));
+  }
+
+  .station-over,
+  .mast-sub,
+  .mast-badge{
+    letter-spacing:.06em;
+    font-size:.72rem;
+  }
+
+  .masthead h1{
+    font-size:clamp(2rem, 10vw, 2.8rem);
+  }
+
+  .departures{
+    gap:.5rem;
+  }
+
+  .flap{
+    min-width:calc(33.333% - .5rem);
+    padding:.55rem .35rem;
+  }
+
   .flap .n{font-size:1.2rem}
+
+  main{
+    padding:
+      1.5rem
+      max(1rem, env(safe-area-inset-right))
+      calc(3rem + env(safe-area-inset-bottom))
+      max(1rem, env(safe-area-inset-left));
+  }
+
+  .qcard{
+    outline:none;
+    padding:1.25rem 1rem 1.2rem;
+  }
+
+  .qcard::before,
+  .qcard::after{
+    left:1rem;
+    right:1rem;
+  }
+
+  .exam-controls{
+    align-items:stretch;
+  }
+
+  .exam-controls > div,
+  .exam-controls .btn{
+    width:100%;
+  }
+
+  .score-line{
+    width:100%;
+    text-align:center;
+    font-size:.8rem;
+    letter-spacing:.04em;
+  }
 }
 </style>
 </head>
@@ -297,20 +392,20 @@ footer .f-title{font-family:'Cormorant Garamond',serif;font-style:italic;font-si
       <div class="flap"><div class="n" id="flap-accuracy">—</div><div class="l">Acierto %</div></div>
     </div>
   </div>
-  <nav class="tabs">
-    <button data-mode="exam" class="active">◉ Modo Examen</button>
-    <button data-mode="study">✎ Modo Estudio</button>
-    <button data-mode="stats">▤ Progreso</button>
+  <nav class="tabs" role="tablist" aria-label="Modo del simulador">
+    <button id="tab-exam" role="tab" aria-selected="true" aria-controls="view-exam" data-mode="exam" class="active">◉ Modo Examen</button>
+    <button id="tab-study" role="tab" aria-selected="false" aria-controls="view-study" data-mode="study">✎ Modo Estudio</button>
+    <button id="tab-stats" role="tab" aria-selected="false" aria-controls="view-stats" data-mode="stats">▤ Progreso</button>
   </nav>
 </header>
 
 <main>
   <!-- ═══════════ MODO EXAMEN ═══════════ -->
-  <section id="view-exam" class="view active">
+  <section id="view-exam" role="tabpanel" aria-labelledby="tab-exam" class="view active">
     <div class="filter-bar" id="exam-filters"></div>
-    <div id="exam-stage"></div>
+    <div id="exam-stage" aria-live="polite"></div>
     <div class="exam-controls">
-      <span class="score-line" id="exam-score">Aciertos: <b>0</b> de 0</span>
+      <span class="score-line" id="exam-score" aria-live="polite">Aciertos: <b>0</b> de 0</span>
       <div style="display:flex;gap:.6rem;flex-wrap:wrap">
         <button class="btn ghost" id="btn-reset-score">Reiniciar sesión</button>
         <button class="btn" id="btn-next" disabled>Siguiente pregunta →</button>
@@ -322,13 +417,13 @@ footer .f-title{font-family:'Cormorant Garamond',serif;font-style:italic;font-si
   </section>
 
   <!-- ═══════════ MODO ESTUDIO ═══════════ -->
-  <section id="view-study" class="view">
+  <section id="view-study" role="tabpanel" aria-labelledby="tab-study" class="view">
     <div class="filter-bar" id="study-filters"></div>
     <div class="study-list" id="study-list"></div>
   </section>
 
   <!-- ═══════════ PROGRESO ═══════════ -->
-  <section id="view-stats" class="view">
+  <section id="view-stats" role="tabpanel" aria-labelledby="tab-stats" class="view">
     <div class="legend">
       <div><span class="sw g"></span>Dominadas</div>
       <div><span class="sw b"></span>Precisión de acierto</div>
@@ -391,7 +486,11 @@ let mode = "exam";
 document.querySelectorAll("nav.tabs button").forEach(b=>{
   b.addEventListener("click", ()=>{
     mode = b.dataset.mode;
-    document.querySelectorAll("nav.tabs button").forEach(x=>x.classList.toggle("active", x===b));
+    document.querySelectorAll("nav.tabs button").forEach(x=>{
+      const active = x === b;
+      x.classList.toggle("active", active);
+      x.setAttribute("aria-selected", String(active));
+    });
     document.querySelectorAll("section.view").forEach(s=>s.classList.remove("active"));
     document.getElementById("view-"+mode).classList.add("active");
     if(mode==="study") renderStudy();
@@ -443,7 +542,7 @@ function newQuestion(){
       <div class="opts" id="opts">
         ${q.opts.map((o,i)=>`<button class="opt" data-i="${i}"><span class="key">${KEYS[i]}</span><span>${esc(o)}</span><span class="mark"></span></button>`).join("")}
       </div>
-      <div class="verdict" id="verdict"></div>
+      <div class="verdict" id="verdict" role="status" aria-live="assertive"></div>
     </div>`;
   document.querySelectorAll("#opts .opt").forEach(btn=>{
     btn.addEventListener("click", ()=> answer(parseInt(btn.dataset.i,10)));
