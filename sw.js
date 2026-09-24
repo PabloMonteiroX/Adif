@@ -1,4 +1,4 @@
-const CACHE = "adif-oep2026-v1";
+const CACHE = "adif-oep2026-v2";
 const CORE = [
   "./",
   "./index.html",
@@ -24,31 +24,22 @@ self.addEventListener("activate", (e) => {
   );
 });
 
+/* Stale-while-revalidate: responde al instante desde caché y actualiza en segundo plano */
 self.addEventListener("fetch", (e) => {
   const req = e.request;
   if (req.method !== "GET") return;
+  if (new URL(req.url).origin !== self.location.origin) return;
 
-  const url = new URL(req.url);
-  if (url.origin !== self.location.origin) return;
-
-  if (req.mode === "navigate") {
-    e.respondWith(
-      fetch(req)
-        .then((res) => {
-          const copy = res.clone();
-          caches.open(CACHE).then((c) => c.put("./index.html", copy));
-          return res;
-        })
-        .catch(() => caches.match("./index.html"))
-    );
-    return;
-  }
-
+  const key = req.mode === "navigate" ? "./index.html" : req;
   e.respondWith(
-    caches.match(req).then((hit) => hit || fetch(req).then((res) => {
-      const copy = res.clone();
-      caches.open(CACHE).then((c) => c.put(req, copy));
-      return res;
-    }))
+    caches.open(CACHE).then((c) =>
+      c.match(key).then((hit) => {
+        const net = fetch(req)
+          .then((res) => { if (res.ok) c.put(key, res.clone()); return res; })
+          .catch(() => hit);
+        if (hit) { e.waitUntil(net); return hit; }
+        return net;
+      })
+    )
   );
 });
