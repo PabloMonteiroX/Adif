@@ -1051,15 +1051,30 @@ const examCat={v:"all"}, studyCat={v:"all"};
 /* ═══════════════ MODO EXAMEN ═══════════════ */
 let current=null, locked=false, lastId=null;
 let scoreOk=0, scoreTot=0;
+let deck=[];
 
 function pool(){ return examCat.v==="all" ? QUESTIONS : QUESTIONS.filter(q=>q.cat===examCat.v); }
+
+function shuffle(arr){
+  for(let i=arr.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]]=[arr[j],arr[i]];
+  }
+}
 
 function newQuestion(){
   const p = pool();
   if(p.length===0) return;
-  let q, guard=0;
-  do{ q = p[Math.floor(Math.random()*p.length)]; guard++; }
-  while(p.length>1 && q.id===lastId && guard<25);
+
+  /* Deck vacío → nuevo ciclo: mezcla y repone todas las preguntas del pool */
+  if(deck.length===0){
+    deck=[...p];
+    shuffle(deck);
+    /* Evitar que la 1ª del nuevo ciclo sea la misma que la última del anterior */
+    if(deck.length>1 && deck[0].id===lastId) deck.push(deck.shift());
+  }
+
+  const q=deck.shift();
   lastId=q.id; current=q; locked=false;
 
   const c = CATS[q.cat];
@@ -1208,7 +1223,7 @@ function esc(s){
 }
 
 /* ═══════════════ ARRANQUE ═══════════════ */
-buildFilters("exam-filters", ()=>{ lastId=null; newQuestion(); }, examCat, ()=>examCat.v);
+buildFilters("exam-filters", ()=>{ deck=[]; lastId=null; newQuestion(); }, examCat, ()=>examCat.v);
 buildFilters("study-filters", ()=>renderStudy(), studyCat, ()=>studyCat.v);
 refreshFlaps();
 newQuestion();
