@@ -1,8 +1,9 @@
-const CACHE = "adif-oep2026-v2";
+const CACHE = "adif-oep2026-v3";
 const CORE = [
   "./",
   "./index.html",
   "./manifest.webmanifest",
+  "./data/ugt.json",
   "./icons/icon-192.png",
   "./icons/icon-512.png",
   "./icons/apple-touch-icon-180.png"

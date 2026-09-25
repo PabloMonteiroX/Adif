@@ -12,7 +12,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon-180.png">
 <title>ADIF · OEP 2026 — Simulador Montador Eléctrico</title>
-<meta name="description" content="Simulador de exámenes ADIF OEP 2026 — Perfil 26/11PO Montador Eléctrico IISS. 162 preguntas oficiales de convocatorias 2023, 2024 y 2025.">
+<meta name="description" content="Simulador de exámenes ADIF OEP 2026 — Perfil 26/11PO Montador Eléctrico IISS. 162 preguntas oficiales de convocatorias 2023, 2024 y 2025 + banco UGT Entre Raíles.">
 <style>
 /* ═══════════════ TOKENS ═══════════════ */
 :root{
@@ -239,6 +239,51 @@ kbd{font:600 11px var(--font);padding:1px 5px;border-radius:4px;border:1px solid
 .legend span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px;background:var(--c)}
 .wipe{display:flex;justify-content:center;padding-block:16px 24px}
 
+
+/* ═══════════════ FUENTE UGT ═══════════════ */
+.seg.src button{display:flex;align-items:center;justify-content:center;gap:6px}
+.seg.src small{font-size:11px;font-weight:700;opacity:.7;font-variant-numeric:tabular-nums}
+.selects{flex-wrap:nowrap}
+.sel{flex:1;min-width:0;padding:8px 10px;border-radius:12px;border:1px solid var(--line);background:var(--surface);font-size:14px;font-weight:600;color:var(--ink)}
+.sel:disabled{color:var(--muted);opacity:.7}
+@media (max-width:520px){ .selects{flex-wrap:wrap} .sel{flex-basis:100%} }
+.info{display:flex;flex-direction:column;gap:4px;margin-top:12px;padding:10px 12px;border-left:3px solid var(--accent);background:var(--surface-2);border-radius:0 10px 10px 0;font-size:13px}
+.info .ref{font-weight:700;font-variant-numeric:tabular-nums}
+.info .note{color:var(--muted)}
+.conf{align-self:flex-start;font-size:11px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;padding:2px 7px;border-radius:6px;background:var(--ok-bg);color:var(--ok)}
+.conf.cM{background:#fdf1d8;color:#8a5a00}
+.conf.cB{background:var(--bad-bg);color:var(--bad)}
+@media (prefers-color-scheme: dark){ .conf.cM{background:#35290f;color:#f0c46a} }
+.list .reveal-info{display:none}
+.list .shown .reveal-info,.list.all .reveal-info{display:block}
+.subhead{font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;padding-top:8px}
+.block.wide .srow{grid-template-columns:minmax(90px,130px) 1fr auto}
+
+/* ═══════════════ MODOS · SIMULACRO · HOY ═══════════════ */
+.modes{margin-top:12px}
+.modes small{font-size:11px;font-weight:700;background:var(--accent);color:#1b1300;border-radius:9px;padding:0 6px;margin-left:4px;font-variant-numeric:tabular-nums}
+.modehelp{font-size:12px;color:var(--muted);padding-top:6px;max-width:68ch}
+.muted{color:var(--muted)}
+.simcfg{display:flex;flex-direction:column;gap:12px;margin-top:12px}
+.simcfg .btn{flex:none}
+.clock{font-weight:700;font-variant-numeric:tabular-nums;color:var(--ink)}
+.clock.low{color:var(--bad)}
+.dots{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:12px}
+.dots button{width:16px;height:16px;border-radius:4px;background:var(--surface-2);border:1px solid var(--line)}
+.dots button.a{background:var(--muted);border-color:var(--muted)}
+.dots button.cur{outline:2px solid var(--accent);outline-offset:1px}
+.opt.sel{border-color:var(--ink);background:var(--surface-2)}
+.opt.sel .k{background:var(--ink);color:var(--bg)}
+.list .opt.wrong{border-color:var(--bad);background:var(--bad-bg)}
+.list .opt.wrong .k{background:var(--bad);color:#fff}
+.simres{margin-top:12px;display:flex;flex-direction:column;gap:8px}
+.simres.pass{border-color:var(--ok)}
+.simres.fail{border-color:var(--bad)}
+.simres .srow,.block .srow{grid-template-columns:minmax(64px,130px) 1fr auto}
+.todayline{font-size:14px;padding-top:6px}
+.weakrow{display:flex;justify-content:space-between;align-items:center;gap:10px;padding-block:8px;border-top:1px solid var(--line);font-size:14px}
+.weakrow:first-of-type{border-top:0}
+
 @media (min-width:720px){
   .qtext{font-size:20px}
   .card{padding:24px}
@@ -255,7 +300,7 @@ kbd{font:600 11px var(--font);padding:1px 5px;border-radius:4px;border:1px solid
     <div class="logo" aria-hidden="true">adif</div>
     <div class="titles">
       <h1>Simulador OEP 2026</h1>
-      <p>Montador Eléctrico IISS · 26/11PO · 25/09PO</p>
+      <p id="h-sub">Montador Eléctrico IISS · 26/11PO · 25/09PO</p>
     </div>
     <div class="pill" aria-label="Progreso global"><b id="h-mastered">0/162</b>dominadas</div>
   </div>
@@ -266,6 +311,13 @@ kbd{font:600 11px var(--font);padding:1px 5px;border-radius:4px;border:1px solid
 
   <!-- ═══════════ EXAMEN ═══════════ -->
   <section class="view" id="view-exam" role="tabpanel" aria-labelledby="tab-exam">
+    <div class="seg modes" id="modes" role="group" aria-label="Modo de práctica">
+      <button data-mode="smart" aria-pressed="true">Repaso <small id="m-due">0</small></button>
+      <button data-mode="free" aria-pressed="false">Todas</button>
+      <button data-mode="sim" aria-pressed="false">Simulacro</button>
+    </div>
+    <p class="modehelp" id="modehelp"></p>
+    <div id="practice">
     <div class="progress">
       <span id="cycle">Pregunta 0 de 0</span>
       <span id="score" aria-live="polite">Sesión: <b>0</b>/0</span>
@@ -277,6 +329,8 @@ kbd{font:600 11px var(--font);padding:1px 5px;border-radius:4px;border:1px solid
       <button class="btn" id="btn-next" disabled>Siguiente →</button>
     </div>
     <p class="hint"><kbd>1</kbd>–<kbd>4</kbd> o <kbd>A</kbd>–<kbd>D</kbd> para responder · <kbd>Enter</kbd> siguiente</p>
+    </div>
+    <div id="sim" hidden></div>
   </section>
 
   <!-- ═══════════ ESTUDIO ═══════════ -->
@@ -291,7 +345,10 @@ kbd{font:600 11px var(--font);padding:1px 5px;border-radius:4px;border:1px solid
 
   <!-- ═══════════ PROGRESO ═══════════ -->
   <section class="view" id="view-stats" role="tabpanel" aria-labelledby="tab-stats" hidden>
+    <p class="count" id="stats-src"></p>
     <div class="kpis" id="kpis"></div>
+    <div class="card block" id="today"></div>
+    <div class="card block" id="weak"></div>
     <div class="legend"><span style="--c:var(--ok)">Dominadas</span><span style="--c:var(--accent)">Vistas</span><span style="--c:var(--surface-2)">Pendientes</span></div>
     <div id="blocks"></div>
     <div class="wipe"><button class="btn danger" id="btn-wipe" style="flex:none">Borrar todo el progreso</button></div>
@@ -318,57 +375,201 @@ const BLOCKS = {
 };
 const YEARS = [2023,2024,2025];
 const KEYS = ["A","B","C","D"];
-QUESTIONS.forEach(q=>{ q.block = q.cat.slice(0,3); q.year = 2000 + +q.cat.slice(3); });
+QUESTIONS.forEach(q=>{ q.src = "of"; q.block = q.cat.slice(0,3); q.year = 2000 + +q.cat.slice(3); });
 
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
 const pct = (a,b) => b ? Math.round(100*a/b) : 0;
+const norm = s => s.normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase();
+
+/* ═══════════════ FUENTES ═══════════════
+   "of"  = exámenes oficiales Adif (embebidos arriba)
+   "ugt" = baterías UGT Entre Raíles (data/ugt.json, carga diferida).
+   Cada fuente tiene sus filtros; el progreso comparte almacén (ids distintos). */
+const SRC_KEY = "adif-oep-2026-src";
+let src = "of";
+try{ src = localStorage.getItem(SRC_KEY) === "ugt" ? "ugt" : "of"; }catch(e){}
+let UGT = null, UGT_META = null, ugtLoading = null;
+
+function loadUGT(){
+  if(UGT) return Promise.resolve(UGT);
+  if(ugtLoading) return ugtLoading;
+  ugtLoading = fetch("data/ugt.json").then(r=>{ if(!r.ok) throw new Error(r.status); return r.json(); }).then(b=>{
+    const tp = Object.fromEntries(b.topics.map(t=>[t.id,t]));
+    b.questions.forEach(q=>{
+      const t = tp[q.topic];
+      q.src = "ugt"; q.a = q.ans;
+      q.block = t.bloque === "COM" ? "gen" : "esp";
+      q.num = q.n;
+    });
+    UGT_META = b; UGT = b.questions;
+    UGT.forEach(q=>{ q._s = norm(q.q + " " + q.opts.join(" ") + " " + q.ref); });
+    return UGT;
+  }).catch(err=>{ ugtLoading = null; throw err; });
+  return ugtLoading;
+}
+const pool = () => src === "ugt" ? (UGT || []) : QUESTIONS;
+const topicOf = q => UGT_META.topics.find(t=>t.id===q.topic);
 
 /* ═══════════════ ALMACENAMIENTO ═══════════════ */
 const STORE_KEY = "adif-oep-2026-v1";
 let store = {};
 try{ store = JSON.parse(localStorage.getItem(STORE_KEY)) || {}; }catch(e){}
 function save(){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(store)); }catch(e){} }
-function rec(id){ return store[id] || {r:0,w:0,m:false}; }
+/* Repetición espaciada (Leitner). Caja b: 0 nueva · 1 en repaso · 2..6 aprendida.
+   Acierto → sube de caja y se aplaza; fallo → caja 1 y vuelve hoy.
+   "Dominada" = caja ≥ 4 (ya acertada con intervalos de 1 y 3 días). */
+const DAY = 864e5;
+const GAP = [0, 0, 1, 3, 7, 16, 35];            /* días hasta el siguiente repaso por caja */
+const now = () => Date.now();
+function rec(id){
+  const e = store[id];
+  if(!e) return {r:0,w:0,m:false,b:0,d:0};
+  if(e.b == null){                               /* migración de progreso v1 */
+    e.b = e.m ? 4 : e.w > 0 ? 1 : e.r > 0 ? 2 : 0;
+    e.d = e.m ? now() + GAP[4]*DAY : now();
+  }
+  return e;
+}
 const failed = q => { const e = rec(q.id); return e.w > 0 && !e.m; };
+const isDue  = q => { const e = rec(q.id); return e.b > 0 && e.d <= now(); };
+const isNew  = q => rec(q.id).b === 0;
 function bump(id, ok){
   const e = rec(id);
   ok ? e.r++ : e.w++;
-  if(ok && e.r >= 2) e.m = true;   /* 2 aciertos → dominada */
-  if(!ok) e.m = false;             /* un fallo la devuelve a repaso */
+  e.b = ok ? Math.min(6, Math.max(2, e.b + 1)) : 1;
+  e.d = now() + GAP[e.b]*DAY;
+  e.m = e.b >= 4;
+  e.t = now();
+  store[id] = e; save(); logDay(ok); refreshHeader();
+}
+function toggleMastered(id){
+  const e = rec(id); e.m = !e.m;
+  e.b = e.m ? 4 : 1; e.d = e.m ? now() + GAP[4]*DAY : now();
   store[id] = e; save(); refreshHeader();
 }
-function toggleMastered(id){ const e = rec(id); e.m = !e.m; store[id] = e; save(); refreshHeader(); }
+
+/* Actividad diaria (racha y objetivo) */
+const LOG_KEY = "adif-oep-2026-log";
+const GOAL = 40;                                 /* preguntas/día */
+let dlog = {};
+try{ dlog = JSON.parse(localStorage.getItem(LOG_KEY)) || {}; }catch(e){}
+const dayKey = (t=now()) => { const d = new Date(t); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); };
+function logDay(ok){
+  const k = dayKey(), x = dlog[k] || {n:0,ok:0};
+  x.n++; if(ok) x.ok++; dlog[k] = x;
+  try{ localStorage.setItem(LOG_KEY, JSON.stringify(dlog)); }catch(e){}
+}
+function streak(){
+  let n = 0, t = now();
+  if(!(dlog[dayKey(t)]||{}).n) t -= DAY;           /* hoy aún no cuenta si no has empezado */
+  while((dlog[dayKey(t)]||{}).n){ n++; t -= DAY; }
+  return n;
+}
 
 function refreshHeader(){
-  const m = QUESTIONS.filter(q=>rec(q.id).m).length;
-  $("h-mastered").textContent = m + "/" + QUESTIONS.length;
+  const P = pool();
+  const m = P.filter(q=>rec(q.id).m).length;
+  $("h-mastered").textContent = m + "/" + P.length;
+  if($("m-due")) $("m-due").textContent = P.filter(q=>matches(q) && isDue(q)).length;
+  $("h-sub").textContent = src === "ugt"
+    ? "Banco UGT Entre Raíles · no oficial"
+    : "Montador Eléctrico IISS · 26/11PO · 25/09PO";
 }
 
 /* ═══════════════ FILTROS (compartidos Examen/Estudio) ═══════════════ */
-const F = {block:"all", year:"all", onlyFailed:false};
+const F = {block:"all", year:"all", onlyFailed:false, topic:"all", sub:"all", set:"all", out:false};
 function matches(q){
-  return (F.block==="all" || q.block===F.block)
-      && (F.year==="all" || q.year===+F.year)
-      && (!F.onlyFailed || failed(q));
+  if(F.onlyFailed && !failed(q)) return false;
+  if(q.src === "of"){
+    return (F.block==="all" || q.block===F.block)
+        && (F.year==="all" || q.year===+F.year);
+  }
+  return (F.block==="all" || F.block==="ing" || q.block===F.block)
+      && (F.topic==="all" || q.topic===F.topic)
+      && (F.sub==="all" || q.sub===F.sub)
+      && (F.set==="all" || q.set===F.set)
+      && (F.out || !q.out);
 }
 function renderFilters(){
   const seg = (key, opts) => `<div class="seg" role="group">${opts.map(([v,l])=>
     `<button data-k="${key}" data-v="${v}" aria-pressed="${String(F[key])===String(v)}">${l}</button>`).join("")}</div>`;
-  const nFailed = QUESTIONS.filter(failed).length;
-  $("filters").innerHTML =
-    seg("block", [["all","Todo"], ...Object.entries(BLOCKS).map(([k,b])=>[k,b.name])]) +
-    `<div class="row">${seg("year", [["all","Todos"], ...YEARS.map(y=>[y,y])])}
-     <button class="toggle" data-k="onlyFailed" aria-pressed="${F.onlyFailed}">✗ Falladas <span>${nFailed}</span></button></div>`;
+  const srcSeg = `<div class="seg src" role="group" aria-label="Fuente de preguntas">
+    <button data-src="of" aria-pressed="${src==="of"}">Oficiales Adif <small>${QUESTIONS.length}</small></button>
+    <button data-src="ugt" aria-pressed="${src==="ugt"}">UGT Entre Raíles <small>${UGT ? UGT.length : 1080}</small></button></div>`;
+  if(src === "ugt" && !UGT){ $("filters").innerHTML = srcSeg; return; }
+  const nFailed = pool().filter(q=>failed(q)).length;
+  const failBtn = `<button class="toggle" data-k="onlyFailed" aria-pressed="${F.onlyFailed}">✗ Falladas <span>${nFailed}</span></button>`;
+  if(src === "of"){
+    $("filters").innerHTML = srcSeg +
+      seg("block", [["all","Todo"], ...Object.entries(BLOCKS).map(([k,b])=>[k,b.name])]) +
+      `<div class="row">${seg("year", [["all","Todos"], ...YEARS.map(y=>[y,y])])}${failBtn}</div>`;
+    return;
+  }
+  const blk = F.block === "gen" ? "COM" : F.block === "esp" ? "ESP" : null;
+  const topics = UGT_META.topics.filter(t=>!blk || t.bloque===blk);
+  const subs = F.topic === "all" ? [] : [...new Set(UGT.filter(q=>q.topic===F.topic).map(q=>q.sub))];
+  const isCom = F.topic!=="all" && topicOf({topic:F.topic}).bloque==="COM";
+  const sets = UGT_META.sets.filter(s=> F.topic!=="all" ? (isCom ? !s.topic : s.topic===F.topic)
+                                     : blk==="COM" ? !s.topic : blk==="ESP" ? !!s.topic : true);
+  const nOut = UGT.filter(q=>q.out).length;
+  $("filters").innerHTML = srcSeg +
+    seg("block", [["all","Todo"],["esp","Específica"],["gen","Común"]]) +
+    seg("topic", [["all","Todos los temas"], ...topics.map(t=>[t.id,esc(t.short)])]) +
+    `<div class="row selects">
+      <select class="sel" data-k="sub" aria-label="Subtema" ${subs.length?"":"disabled"}>
+        <option value="all">${subs.length ? "Todos los subtemas" : "Subtema: elige un tema"}</option>
+        ${subs.map(s=>`<option value="${esc(s)}" ${F.sub===s?"selected":""}>${esc(s)}</option>`).join("")}
+      </select>
+      <select class="sel" data-k="set" aria-label="Cuadernillo">
+        <option value="all">Todos los cuadernillos</option>
+        ${sets.map(s=>`<option value="${esc(s.id)}" ${F.set===s.id?"selected":""}>${esc(s.name)}</option>`).join("")}
+      </select></div>
+    <div class="row">${failBtn}
+      <button class="toggle" data-k="out" aria-pressed="${F.out}" title="Preguntas de PRL caps. II y IV, fuera del temario OEP 2026">+ Fuera de temario <span>${nOut}</span></button></div>`;
+}
+function filtersChanged(){
+  renderFilters(); refreshHeader();
+  deck = [];
+  if(mode === "sim"){ if(!sim || !sim.running) { sim = null; renderSim(); } }
+  else newQuestion();
+  if(view==="study") renderStudy();
+  if(view==="stats") renderStats();
 }
 $("filters").addEventListener("click", e=>{
+  if(sim && sim.running) return;                 /* no cambiar filtros a mitad de simulacro */
+  const s = e.target.closest("button[data-src]");
+  if(s){ setSource(s.dataset.src); return; }
   const b = e.target.closest("button[data-k]"); if(!b) return;
   const k = b.dataset.k;
-  F[k] = k==="onlyFailed" ? !F.onlyFailed : b.dataset.v;
-  renderFilters();
-  deck = []; newQuestion();
-  if(view==="study") renderStudy();
+  if(k==="onlyFailed" || k==="out") F[k] = !F[k];
+  else F[k] = b.dataset.v;
+  if(k==="block"){ F.topic = "all"; F.sub = "all"; F.set = "all"; }
+  if(k==="topic"){ F.sub = "all"; F.set = "all"; }
+  filtersChanged();
 });
+$("filters").addEventListener("change", e=>{
+  const s = e.target.closest("select[data-k]"); if(!s) return;
+  F[s.dataset.k] = s.value;
+  filtersChanged();
+});
+
+function setSource(next){
+  if(next === src && (next==="of" || UGT)) return;
+  src = next;
+  try{ localStorage.setItem(SRC_KEY, src); }catch(e){}
+  Object.assign(F, {block:"all", year:"all", onlyFailed:false, topic:"all", sub:"all", set:"all", out:false});
+  scoreOk = scoreTot = 0; deck = []; lastId = null;
+  if(src === "ugt" && !UGT){
+    renderFilters(); refreshHeader();
+    $("stage").innerHTML = `<div class="card empty">Cargando banco UGT…</div>`;
+    $("study-list").innerHTML = `<div class="empty">Cargando banco UGT…</div>`;
+    loadUGT().then(()=>{ if(src==="ugt") filtersChanged(); })
+      .catch(()=>{ $("stage").innerHTML = `<div class="card empty">No se pudo cargar el banco UGT. Comprueba la conexión y vuelve a pulsar la fuente.</div>`; });
+    return;
+  }
+  filtersChanged();
+}
 
 /* ═══════════════ NAVEGACIÓN ═══════════════ */
 let view = "exam";
@@ -382,6 +583,24 @@ document.querySelectorAll(".tabs button").forEach(b=>b.addEventListener("click",
   if(view==="stats") renderStats();
   scrollTo(0,0);
 }));
+
+/* ═══════════════ PRESENTACIÓN COMÚN ═══════════════ */
+const CONF = {V:"Clave verificada con el texto legal", A:"Clave de confianza alta", M:"Clave dudosa · revisar", B:"Clave ambigua · revisar"};
+function tagHTML(q){
+  if(q.src === "of"){ const b = BLOCKS[q.block]; return `<span class="tag ${b.cls}">${b.name} ${q.year}</span>`; }
+  const t = topicOf(q);
+  return `<span class="tag ${q.block==="esp"?"esp":""}">UGT · ${esc(t.short)}</span>`;
+}
+function whereHTML(q){ return q.src === "of" ? `Nº ${q.num}` : esc(q.origin); }
+function infoHTML(q){
+  if(q.src === "of") return "";
+  const bits = [];
+  if(q.ref) bits.push(`<span class="ref">${esc(q.ref)}</span>`);
+  if(q.conf && q.conf !== "K") bits.push(`<span class="conf c${q.conf}">${CONF[q.conf]||q.conf}</span>`);
+  if(q.out) bits.push(`<span class="conf cB">Fuera del temario 2026</span>`);
+  if(q.note) bits.push(`<span class="note">${esc(q.note)}</span>`);
+  return bits.length ? `<div class="info">${bits.join("")}</div>` : "";
+}
 
 /* ═══════════════ MODO EXAMEN ═══════════════
    Mazo sin repeticiones: cada pregunta sale una vez por ciclo.
@@ -399,38 +618,81 @@ function shuffle(a){
   for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
   return a;
 }
+/* Modos: smart = repasos vencidos + nuevas (lote de 20) · free = todo el filtro · sim = simulacro cronometrado */
+const MODE_KEY = "adif-oep-2026-mode", NEW_BATCH = 20;
+let mode = "smart";
+try{ mode = localStorage.getItem(MODE_KEY) || "smart"; }catch(e){}
+const MODE_HELP = {
+  smart:"Primero lo que toca repasar hoy (fallos y preguntas aprendidas cuyo plazo ha vencido), después 20 nuevas. Cada acierto aplaza la pregunta 1, 3, 7, 16 y 35 días.",
+  free:"Todas las preguntas del filtro, una vez por ciclo: falladas, nuevas, vistas y dominadas.",
+  sim:"Examen con tiempo y sin corrección hasta entregar. Nota sin penalización, como en las bases 2026."
+};
+function setMode(m, keepDeck){
+  mode = m; try{ localStorage.setItem(MODE_KEY, m); }catch(e){}
+  document.querySelectorAll("#modes button").forEach(b=>b.setAttribute("aria-pressed", String(b.dataset.mode===m)));
+  $("modehelp").textContent = MODE_HELP[m];
+  $("practice").hidden = m === "sim";
+  $("sim").hidden = m !== "sim";
+  if(m === "sim") renderSim();
+  else if(!keepDeck){ deck = []; lastId = null; newQuestion(); }
+}
+$("modes").addEventListener("click", e=>{ const b = e.target.closest("button[data-mode]"); if(b && !(sim && sim.running)) setMode(b.dataset.mode); });
+
+function buildDeck(){
+  const P = shuffle(pool().filter(matches));
+  if(mode === "smart"){
+    const due = P.filter(isDue).sort((a,b)=>rec(a.id).b - rec(b.id).b || rec(a.id).d - rec(b.id).d);
+    const fresh = P.filter(isNew).slice(0, NEW_BATCH);
+    return [...due, ...fresh];
+  }
+  return P.sort((a,b)=>priority(a)-priority(b));
+}
+function nextDueText(){
+  const P = pool().filter(matches).filter(q=>rec(q.id).b>0);
+  if(!P.length) return "";
+  const t = Math.min(...P.map(q=>rec(q.id).d));
+  const days = Math.max(1, Math.ceil((t - now())/DAY));
+  return ` El próximo repaso vence en ${days} día${days>1?"s":""}.`;
+}
 function newQuestion(){
+  if(src==="ugt" && !UGT) return;
+  if(mode === "sim") return;
   if(deck.length===0){
-    deck = shuffle(QUESTIONS.filter(matches)).sort((a,b)=>priority(a)-priority(b));
+    deck = buildDeck();
     if(deck.length>1 && deck[0].id===lastId) deck.push(deck.shift());
     cycleSize = deck.length;
   }
   if(deck.length===0){
     current = null;
-    $("stage").innerHTML = `<div class="card empty">${F.onlyFailed ? "🎉 No tienes preguntas falladas pendientes en este filtro." : "No hay preguntas con este filtro."}</div>`;
+    const msg = F.onlyFailed ? "🎉 No tienes preguntas falladas pendientes en este filtro."
+      : mode==="smart" && pool().some(matches) ? `✓ Al día en este filtro: no quedan repasos ni nuevas.${nextDueText()}<br><button class="mini" data-go="free" style="margin-top:12px">Practicar todas igualmente</button>`
+      : "No hay preguntas con este filtro.";
+    $("stage").innerHTML = `<div class="card empty">${msg}</div>`;
     $("btn-next").disabled = true;
     updateProgress();
     return;
   }
   const q = current = deck.shift();
   lastId = q.id; locked = false;
-  const e = rec(q.id), b = BLOCKS[q.block];
+  const e = rec(q.id);
   $("stage").innerHTML = `
     <article class="card qcard">
       <div class="meta">
-        <span class="tag ${b.cls}">${b.name} ${q.year}</span>
-        <span>Nº ${q.num}${e.r+e.w ? ` · ${e.r}✓ ${e.w}✗` : " · nueva"}</span>
+        ${tagHTML(q)}
+        <span>${whereHTML(q)}${e.r+e.w ? ` · ${e.r}✓ ${e.w}✗` : " · nueva"}${e.b>1 ? ` · caja ${e.b}` : ""}</span>
       </div>
       <div class="qtext">${esc(q.q)}</div>
       <div class="opts" id="opts">
         ${q.opts.map((o,i)=>`<button class="opt" data-i="${i}"><span class="k">${KEYS[i]}</span><span>${esc(o)}</span></button>`).join("")}
       </div>
       <div class="verdict" id="verdict" role="status"></div>
+      <div id="qinfo" hidden>${infoHTML(q)}</div>
     </article>`;
   $("btn-next").disabled = true;
   updateProgress();
 }
 $("stage").addEventListener("click", e=>{
+  const g = e.target.closest("[data-go]"); if(g){ setMode(g.dataset.go); return; }
   const b = e.target.closest(".opt"); if(b) answer(+b.dataset.i);
 });
 
@@ -448,9 +710,11 @@ function answer(i){
   scoreTot++;
   const v = $("verdict");
   v.className = "verdict " + (good ? "good" : "bad");
+  const back = GAP[rec(q.id).b];
   v.textContent = good
-    ? "✓ Correcta" + (rec(q.id).m ? " · dominada" : "")
-    : "✗ Incorrecta · la buena es la " + KEYS[q.a];
+    ? "✓ Correcta" + (rec(q.id).m ? " · dominada" : "") + ` · vuelve en ${back} día${back>1?"s":""}`
+    : "✗ Incorrecta · la buena es la " + KEYS[q.a] + " · vuelve en este repaso";
+  if($("qinfo")) $("qinfo").hidden = false;
   $("btn-next").disabled = false;
   $("btn-next").focus({preventScroll:true});
   updateProgress();
@@ -468,33 +732,160 @@ $("btn-next").addEventListener("click", newQuestion);
 $("btn-reset").addEventListener("click", ()=>{ scoreOk = scoreTot = 0; deck = []; lastId = null; newQuestion(); });
 
 document.addEventListener("keydown", e=>{
-  if(view!=="exam" || e.target instanceof HTMLInputElement || e.metaKey || e.ctrlKey || e.altKey) return;
+  if(view!=="exam" || e.target instanceof HTMLInputElement || e.target instanceof HTMLSelectElement || e.metaKey || e.ctrlKey || e.altKey) return;
   const map = {"1":0,"2":1,"3":2,"4":3,a:0,b:1,c:2,d:3};
   const k = e.key.toLowerCase();
+  if(mode === "sim"){
+    if(!sim || !sim.running) return;
+    if(k in map){ simPick(map[k]); }
+    else if(e.key==="ArrowRight" || e.key==="Enter"){ e.preventDefault(); simGo(1); }
+    else if(e.key==="ArrowLeft"){ simGo(-1); }
+    return;
+  }
   if(k in map && !locked){ answer(map[k]); }
   else if((e.key==="Enter" || e.key==="ArrowRight") && locked){ e.preventDefault(); newQuestion(); }
 });
 
+
+/* ═══════════════ SIMULACRO CRONOMETRADO ═══════════════ */
+const SIM_KEY = "adif-oep-2026-simn";
+let simN = 40; try{ simN = +localStorage.getItem(SIM_KEY) || 40; }catch(e){}
+let sim = null, simTimer = null;
+const fmt = s => Math.floor(s/60) + ":" + String(s%60).padStart(2,"0");
+
+function renderSim(){
+  const box = $("sim");
+  if(src==="ugt" && !UGT){ box.innerHTML = `<div class="card empty">Cargando banco UGT…</div>`; return; }
+  if(!sim){
+    const avail = pool().filter(matches).length;
+    const n = Math.min(simN, avail);
+    box.innerHTML = `<div class="card simcfg">
+      <h3>Nuevo simulacro</h3>
+      <p class="muted">Usa los filtros de arriba (fuente, bloque, tema, cuadernillo). Hay <b>${avail}</b> preguntas disponibles.</p>
+      <div class="seg" role="group" aria-label="Número de preguntas">${[20,40,60,100].map(v=>`<button data-n="${v}" aria-pressed="${simN===v}">${v}</button>`).join("")}</div>
+      <p class="muted">${n} preguntas · ${n} min (1 min por pregunta) · sin corrección hasta entregar.</p>
+      <button class="btn" id="sim-start" ${n?"":"disabled"}>Empezar simulacro</button>
+    </div>`;
+    return;
+  }
+  if(sim.running){
+    const q = sim.qs[sim.i], a = sim.ans[sim.i];
+    const left = Math.max(0, Math.round((sim.end - now())/1000));
+    const answered = sim.ans.filter(x=>x!=null).length;
+    box.innerHTML = `
+      <div class="progress"><span>Pregunta <b>${sim.i+1}</b> de ${sim.qs.length} · ${answered} contestadas</span>
+        <span class="clock ${left<120?"low":""}" id="simclock">⏱ ${fmt(left)}</span></div>
+      <div class="track"><i style="width:${pct(answered, sim.qs.length)}%"></i></div>
+      <div class="dots" aria-label="Mapa del simulacro">${sim.qs.map((_,k)=>`<button data-j="${k}" class="${sim.ans[k]!=null?"a":""} ${k===sim.i?"cur":""}" aria-label="Pregunta ${k+1}"></button>`).join("")}</div>
+      <article class="card qcard">
+        <div class="meta">${tagHTML(q)}<span>${whereHTML(q)}</span></div>
+        <div class="qtext">${esc(q.q)}</div>
+        <div class="opts">${q.opts.map((o,i)=>`<button class="opt${a===i?" sel":""}" data-p="${i}"><span class="k">${KEYS[i]}</span><span>${esc(o)}</span></button>`).join("")}</div>
+      </article>
+      <div class="actions">
+        <button class="btn ghost" data-nav="-1" ${sim.i?"":"disabled"}>←</button>
+        <button class="btn ghost" data-nav="1" ${sim.i<sim.qs.length-1?"":"disabled"}>→</button>
+        <button class="btn" id="sim-end">Entregar (${answered}/${sim.qs.length})</button>
+      </div>
+      <p class="hint"><kbd>A</kbd>–<kbd>D</kbd> marcar · <kbd>←</kbd><kbd>→</kbd> moverse · puedes cambiar respuestas hasta entregar</p>`;
+    return;
+  }
+  /* resultados */
+  const n = sim.qs.length; let ok=0, bad=0, blank=0;
+  const byTag = {};
+  sim.qs.forEach((q,k)=>{
+    const a = sim.ans[k], lab = q.src==="ugt" ? topicOf(q).short : BLOCKS[q.block].name+" "+q.year;
+    const g = byTag[lab] = byTag[lab] || {ok:0,n:0}; g.n++;
+    if(a==null) blank++; else if(a===q.a){ ok++; g.ok++; } else bad++;
+  });
+  const nota = ok/n*10, old = Math.max(0, ok - bad/3)/n*10;
+  const wrong = sim.qs.map((q,k)=>[q,k]).filter(([q,k])=>sim.ans[k]!==q.a);
+  box.innerHTML = `
+    <div class="card simres ${nota>=5?"pass":"fail"}">
+      <h3>${nota>=5 ? "Aprobado" : "Por debajo del 50 %"} · ${nota.toFixed(2)}/10</h3>
+      <p class="muted">${ok} aciertos · ${bad} errores · ${blank} en blanco · ${fmt(sim.used)} usados. Sin penalización (bases 2026). Con la fórmula antigua A−E/3 serían ${old.toFixed(2)}/10.</p>
+      ${blank ? `<p class="muted"><b>Consejo:</b> en 2026 los errores no restan. Las ${blank} en blanco eran puntos gratis: contesta siempre.</p>` : ""}
+      ${Object.entries(byTag).map(([l,g])=>srow(esc(l), {n:g.n, m:g.ok, seen:g.ok, answered:g.n, acc:pct(g.ok,g.n)})).join("")}
+      <div class="sa"><button class="mini" id="sim-new">Nuevo simulacro</button>${wrong.length?`<button class="mini" id="sim-retry">Repasar los ${wrong.length} fallos</button>`:""}</div>
+    </div>
+    <div class="list all">${wrong.map(([q,k])=>`<article class="card">
+      <div class="meta">${tagHTML(q)}<span>${whereHTML(q)} · ${sim.ans[k]==null ? "en blanco" : "marcaste la "+KEYS[sim.ans[k]]}</span></div>
+      <div class="qtext">${esc(q.q)}</div>
+      <div class="opts">${q.opts.map((o,i)=>`<div class="opt${i===q.a?" ans":""}${i===sim.ans[k]?" wrong":""}"><span class="k">${KEYS[i]}</span><span>${esc(o)}</span></div>`).join("")}</div>
+      <div class="reveal-info">${infoHTML(q)}</div></article>`).join("")}</div>`;
+}
+function simStart(){
+  const qs = shuffle(pool().filter(matches)).slice(0, simN);
+  if(!qs.length) return;
+  sim = {qs, ans:Array(qs.length).fill(null), i:0, running:true, start:now(), end:now()+qs.length*60e3};
+  clearInterval(simTimer);
+  simTimer = setInterval(()=>{
+    const left = Math.round((sim.end - now())/1000);
+    if(left <= 0){ simFinish(); return; }
+    const c = $("simclock"); if(c){ c.textContent = "⏱ " + fmt(left); c.classList.toggle("low", left<120); }
+  }, 1000);
+  renderSim(); scrollTo(0,0);
+}
+function simPick(i){ sim.ans[sim.i] = i; renderSim(); }
+function simGo(d){ const j = sim.i + d; if(j>=0 && j<sim.qs.length){ sim.i = j; renderSim(); } }
+function simFinish(){
+  clearInterval(simTimer);
+  sim.running = false; sim.used = Math.round((Math.min(now(), sim.end) - sim.start)/1000);
+  sim.qs.forEach((q,k)=>{ if(sim.ans[k]!=null) bump(q.id, sim.ans[k]===q.a); });
+  renderFilters(); renderSim(); scrollTo(0,0);
+}
+let endArmed = null;
+$("sim").addEventListener("click", e=>{
+  const t = e.target;
+  const nb = t.closest("[data-n]"); if(nb){ simN = +nb.dataset.n; try{ localStorage.setItem(SIM_KEY, simN); }catch(_){} renderSim(); return; }
+  if(t.closest("#sim-start")){ simStart(); return; }
+  if(t.closest("#sim-new")){ sim = null; renderSim(); return; }
+  if(t.closest("#sim-retry")){
+    const ids = new Set(sim.qs.filter((q,k)=>sim.ans[k]!==q.a).map(q=>q.id));
+    sim = null; setMode("free", true); deck = shuffle(pool().filter(q=>ids.has(q.id))); cycleSize = deck.length; scoreOk = scoreTot = 0; newQuestion(); return;
+  }
+  const p = t.closest("[data-p]"); if(p && sim && sim.running){ simPick(+p.dataset.p); return; }
+  const j = t.closest("[data-j]"); if(j){ sim.i = +j.dataset.j; renderSim(); return; }
+  const nv = t.closest("[data-nav]"); if(nv){ simGo(+nv.dataset.nav); return; }
+  const en = t.closest("#sim-end");
+  if(en){
+    const blank = sim.ans.filter(x=>x==null).length;
+    if(blank && !endArmed){
+      en.textContent = `Quedan ${blank} en blanco · pulsa otra vez para entregar`;
+      endArmed = setTimeout(()=>{ endArmed = null; if($("sim-end")) renderSim(); }, 4000);
+      return;
+    }
+    clearTimeout(endArmed); endArmed = null; simFinish();
+  }
+});
+
 /* ═══════════════ MODO ESTUDIO ═══════════════ */
 let showAll = false, searchTimer;
-const norm = s => s.normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase();
 QUESTIONS.forEach(q=>{ q._s = norm(q.q + " " + q.opts.join(" ")); });
+const STUDY_MAX = 300;
 
 function renderStudy(){
+  if(src==="ugt" && !UGT) return;
   const term = norm($("search").value.trim());
-  const items = QUESTIONS.filter(q=>matches(q) && (!term || q._s.includes(term)));
-  $("study-count").textContent = items.length + (items.length===1 ? " pregunta" : " preguntas");
+  const items = pool().filter(q=>matches(q) && (!term || q._s.includes(term)));
+  const shown = items.slice(0, STUDY_MAX);
+  $("study-count").textContent = items.length + (items.length===1 ? " pregunta" : " preguntas") +
+    (items.length > shown.length ? ` · se muestran ${shown.length}, afina con los filtros` : "");
   const list = $("study-list");
   list.classList.toggle("all", showAll);
-  list.innerHTML = items.length ? items.map(q=>{
-    const e = rec(q.id), b = BLOCKS[q.block];
-    return `<article class="card${e.m?" mastered":""}" data-id="${q.id}">
+  let lastSub = null;
+  list.innerHTML = shown.length ? shown.map(q=>{
+    const e = rec(q.id);
+    const head = (q.src==="ugt" && !term && q.sub !== lastSub) ? `<h4 class="subhead">${esc(topicOf(q).short)} · ${esc(q.sub)}</h4>` : "";
+    lastSub = q.sub;
+    return head + `<article class="card${e.m?" mastered":""}" data-id="${q.id}">
       <div class="meta">
-        <span class="tag ${b.cls}">${b.name} ${q.year}</span>
-        <span>Nº ${q.num}${e.r+e.w ? ` · ${e.r}✓ ${e.w}✗` : ""}</span>
+        ${tagHTML(q)}
+        <span>${whereHTML(q)}${e.r+e.w ? ` · ${e.r}✓ ${e.w}✗` : ""}</span>
       </div>
       <div class="qtext">${esc(q.q)}</div>
       <div class="opts">${q.opts.map((o,i)=>`<div class="opt${i===q.a?" ans":""}"><span class="k">${KEYS[i]}</span><span>${esc(o)}</span></div>`).join("")}</div>
+      <div class="reveal-info">${infoHTML(q)}</div>
       <div class="sa">
         <button class="mini" data-act="reveal">Ver respuesta</button>
         <button class="mini${e.m?" on":""}" data-act="master">${e.m?"✓ Dominada":"Marcar dominada"}</button>
@@ -530,24 +921,79 @@ function tally(qs){
   qs.forEach(q=>{ const e=rec(q.id); if(e.m) m++; if(e.r+e.w) seen++; ok+=e.r; ko+=e.w; });
   return {n:qs.length, m, seen, acc:pct(ok, ok+ko), answered:ok+ko};
 }
+function srow(label, s){
+  return `<div class="srow"><span class="y">${label}</span>
+    <div class="bar" title="${s.m} dominadas · ${s.seen} vistas de ${s.n}">
+      <i class="m" style="width:${pct(s.m,s.n)}%"></i><i class="s" style="width:${pct(s.seen-s.m,s.n)}%"></i></div>
+    <span class="n">${s.m}/${s.n}${s.answered ? ` · ${s.acc}%` : ""}</span></div>`;
+}
 function renderStats(){
-  const t = tally(QUESTIONS);
+  const src0 = src;
+  const showOf = () => {
+    const t = tally(QUESTIONS);
+    return Object.entries(BLOCKS).map(([k,b])=>{
+      const rows = YEARS.map(y=>srow(y, tally(QUESTIONS.filter(q=>q.block===k && q.year===y)))).join("");
+      return `<div class="card block"><h3>${b.name} · oficiales</h3>${rows}</div>`;
+    }).join("");
+  };
+  const showUgt = () => [["ESP","Específica"],["COM","Común"]].map(([bk,name])=>{
+    const rows = UGT_META.topics.filter(t=>t.bloque===bk)
+      .map(t=>srow(esc(t.short), tally(UGT.filter(q=>q.topic===t.id)))).join("");
+    return `<div class="card block wide"><h3>${name} · UGT Entre Raíles</h3>${rows}</div>`;
+  }).join("");
+  const P = pool();
+  const t = tally(P);
   $("kpis").innerHTML = [
     [t.m + "/" + t.n, "Dominadas"],
     [t.seen, "Vistas"],
     [t.answered ? t.acc + "%" : "—", "Acierto"]
   ].map(([v,l])=>`<div class="card kpi"><b>${v}</b><span>${l}</span></div>`).join("");
-  $("blocks").innerHTML = Object.entries(BLOCKS).map(([k,b])=>{
-    const rows = YEARS.map(y=>{
-      const s = tally(QUESTIONS.filter(q=>q.block===k && q.year===y));
-      return `<div class="srow"><span class="y">${y}</span>
-        <div class="bar" title="${s.m} dominadas · ${s.seen} vistas de ${s.n}">
-          <i class="m" style="width:${pct(s.m,s.n)}%"></i><i class="s" style="width:${pct(s.seen-s.m,s.n)}%"></i></div>
-        <span class="n">${s.m}/${s.n}${s.answered ? ` · ${s.acc}%` : ""}</span></div>`;
-    }).join("");
-    return `<div class="card block"><h3>${b.name}</h3>${rows}</div>`;
-  }).join("");
+  renderToday(); renderWeak();
+  $("stats-src").textContent = src0 === "ugt" ? "Fuente: UGT Entre Raíles (no oficial)" : "Fuente: exámenes oficiales Adif";
+  $("blocks").innerHTML = src0 === "ugt" ? (UGT ? showUgt() : `<div class="empty">Cargando banco UGT…</div>`) : showOf();
 }
+
+
+function renderToday(){
+  const P = pool(), today = dlog[dayKey()] || {n:0,ok:0};
+  const due = P.filter(isDue).length, fresh = P.filter(isNew).length, st = streak();
+  $("today").innerHTML = `<h3>Hoy</h3>
+    <div class="srow"><span class="y">Objetivo</span>
+      <div class="bar"><i class="m" style="width:${pct(Math.min(today.n,GOAL),GOAL)}%"></i></div>
+      <span class="n">${today.n}/${GOAL}${today.n ? ` · ${pct(today.ok,today.n)}%` : ""}</span></div>
+    <p class="todayline">🔥 Racha: <b>${st} día${st===1?"":"s"}</b> · Repasos pendientes: <b>${due}</b> · Nuevas sin ver: <b>${fresh}</b></p>
+    <div class="sa"><button class="mini on" data-start="smart">${due ? "Hacer los repasos de hoy" : "Empezar con nuevas"}</button><button class="mini" data-start="sim">Simulacro</button></div>`;
+}
+function renderWeak(){
+  const groups = {};
+  pool().forEach(q=>{
+    const e = rec(q.id); if(!(e.r+e.w)) return;
+    const key = q.src==="ugt" ? q.topic+"|"+q.sub : q.block+"|"+q.year;
+    const g = groups[key] = groups[key] || {q, ok:0, n:0, fails:0};
+    g.ok += e.r; g.n += e.r + e.w; if(failed(q)) g.fails++;
+  });
+  const weak = Object.values(groups).filter(g=>g.n>=4 && g.ok/g.n < .85)
+    .sort((a,b)=>a.ok/a.n - b.ok/b.n).slice(0,5);
+  $("weak").innerHTML = `<h3>Dónde fallas más</h3>` + (weak.length ? weak.map(g=>{
+    const q = g.q, label = q.src==="ugt" ? `${topicOf(q).short} · ${q.sub}` : `${BLOCKS[q.block].name} ${q.year}`;
+    const k = q.src==="ugt" ? `${q.topic}|${q.sub}` : `${q.block}|${q.year}`;
+    return `<div class="weakrow"><div><b>${esc(label)}</b><span class="muted"> · ${pct(g.ok,g.n)}% de acierto en ${g.n} respuestas · ${g.fails} falladas</span></div>
+      <button class="mini" data-weak="${esc(k)}">Practicar</button></div>`;
+  }).join("") : `<p class="muted">Aún no hay datos suficientes. Aparecen aquí los subtemas con menos del 85 % de acierto a partir de 4 respuestas.</p>`);
+}
+$("view-stats").addEventListener("click", e=>{
+  const s = e.target.closest("[data-start]"), w = e.target.closest("[data-weak]");
+  if(!s && !w) return;
+  if(w){
+    const [a,b] = w.dataset.weak.split("|");
+    Object.assign(F, {onlyFailed:false, set:"all", out:false});
+    if(src==="ugt"){ F.topic = a; F.sub = b; F.block = topicOf({topic:a}).bloque==="COM" ? "gen" : "esp"; }
+    else { F.block = a; F.year = b; }
+  }
+  $("tab-exam").click();
+  sim = null; setMode(s ? s.dataset.start : "free");
+  renderFilters();
+});
 
 /* Borrado en dos toques (sin diálogos del navegador) */
 let wipeArmed = null;
@@ -559,15 +1005,18 @@ $("btn-wipe").addEventListener("click", e=>{
     return;
   }
   clearTimeout(wipeArmed); wipeArmed = null;
-  store = {}; save(); refreshHeader(); renderStats(); deck = [];
+  store = {}; save(); dlog = {}; try{ localStorage.removeItem(LOG_KEY); }catch(e){}
+  refreshHeader(); renderStats(); deck = [];
   b.textContent = "Progreso borrado";
   setTimeout(()=>b.textContent = "Borrar todo el progreso", 2000);
 });
 
 /* ═══════════════ ARRANQUE ═══════════════ */
-renderFilters();
-refreshHeader();
-newQuestion();
+document.querySelectorAll("#modes button").forEach(b=>b.setAttribute("aria-pressed", String(b.dataset.mode===mode)));
+$("modehelp").textContent = MODE_HELP[mode];
+$("practice").hidden = mode === "sim"; $("sim").hidden = mode !== "sim";
+if(src === "ugt"){ src = "of"; setSource("ugt"); }
+else { renderFilters(); refreshHeader(); if(mode==="sim") renderSim(); else newQuestion(); }
 
 if("serviceWorker" in navigator && (location.protocol==="https:" || location.hostname==="localhost")){
   addEventListener("load", ()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));
