@@ -1,4 +1,4 @@
-const CACHE = "adif-oep2026-v3";
+const CACHE = "adif-oep2026-v4";
 const CORE = [
   "./",
   "./index.html",

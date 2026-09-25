@@ -1,7 +1,7 @@
 {
   "name": "ADIF OEP 2026 · Simulador Montador Eléctrico",
   "short_name": "ADIF OEP26",
-  "description": "Simulador de exámenes ADIF OEP 2026 — Perfil 26/11PO Montador Eléctrico IISS. 162 preguntas oficiales de convocatorias 2023, 2024 y 2025 + banco UGT Entre Raíles (1.080 preguntas, no oficial).",
+  "description": "Simulador de exámenes ADIF OEP 2026 — Perfil 26/11PO Montador Eléctrico IISS. 160 preguntas oficiales de convocatorias 2023, 2024 y 2025 + banco UGT Entre Raíles (1.062 preguntas, no oficial).",
   "lang": "es",
   "dir": "ltr",
   "start_url": "./",
